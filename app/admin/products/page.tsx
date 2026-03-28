@@ -37,16 +37,33 @@ export default function AdminProductsPage() {
     const files = e.target.files;
     if (!files?.length) return;
     setUploading(true);
+    let successCount = 0;
     const urls: string[] = [];
+    
     for (const file of Array.from(files)) {
-      const fd = new FormData();
-      fd.append('file', file);
-      const res = await fetch('/api/upload', { method: 'POST', body: fd });
-      if (res.ok) { const data = await res.json(); urls.push(data.url); }
+      try {
+        const fd = new FormData();
+        fd.append('file', file);
+        const res = await fetch('/api/upload', { method: 'POST', body: fd });
+        const data = await res.json();
+        
+        if (res.ok && data.url) {
+          urls.push(data.url);
+          successCount++;
+        } else {
+          toast.error(`Failed to upload ${file.name}: ${data.error || 'Unknown error'}`);
+        }
+      } catch (err: any) {
+        toast.error(`Error uploading ${file.name}: ${err.message}`);
+      }
     }
-    setImages(prev => [...prev, ...urls]);
+    
+    if (urls.length > 0) {
+      setImages(prev => [...prev, ...urls]);
+      toast.success(`${successCount} image(s) uploaded successfully`);
+    }
     setUploading(false);
-    toast.success(`${urls.length} image(s) uploaded`);
+    if (fileRef.current) fileRef.current.value = '';
   }
 
   async function handleSubmit(e: React.FormEvent) {

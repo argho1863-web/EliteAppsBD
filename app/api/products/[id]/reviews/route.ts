@@ -43,8 +43,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       createdAt: new Date().toISOString(),
     };
 
-    const id = await db.insertOne('reviews', review);
-    return NextResponse.json({ id, ...review });
+    const reviewId = await db.insertOne('reviews', review);
+    return NextResponse.json({ id: reviewId, ...review });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

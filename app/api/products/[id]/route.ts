@@ -19,7 +19,25 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     if (!session || (session.user as any).role !== 'admin') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     const { id } = await params;
     const data = await req.json();
-    await db.updateOne('products', { _id: { $oid: id } }, { $set: data });
+
+    // Build $set and $unset operations
+    const setFields: Record<string, any> = {};
+    const unsetFields: Record<string, string> = {};
+
+    for (const [key, value] of Object.entries(data)) {
+      if (value === null || value === undefined || value === '') {
+        // Unset the field if it's empty/null/undefined
+        unsetFields[key] = '';
+      } else {
+        setFields[key] = value;
+      }
+    }
+
+    const update: Record<string, any> = {};
+    if (Object.keys(setFields).length > 0) update.$set = setFields;
+    if (Object.keys(unsetFields).length > 0) update.$unset = unsetFields;
+
+    await db.updateOne('products', { _id: { $oid: id } }, update);
     return NextResponse.json({ message: 'Updated' });
   } catch { return NextResponse.json({ error: 'Failed' }, { status: 500 }); }
 }

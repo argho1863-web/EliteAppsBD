@@ -73,9 +73,9 @@ export default function AdminProductsPage() {
     const payload = { 
       ...form, 
       price: form.productType === 'app' ? parseFloat(form.price) : 0, 
-      originalPrice: form.originalPrice ? parseFloat(form.originalPrice) : undefined,
-      priceMin: form.priceMin ? parseFloat(form.priceMin) : undefined,
-      priceMax: form.priceMax ? parseFloat(form.priceMax) : undefined,
+      originalPrice: form.originalPrice ? parseFloat(form.originalPrice) : null,
+      priceMin: form.priceMin ? parseFloat(form.priceMin) : null,
+      priceMax: form.priceMax ? parseFloat(form.priceMax) : null,
       stock: parseInt(form.stock), 
       rating: parseFloat(form.rating), 
       reviews: parseInt(form.reviews) || 0,

@@ -1,165 +1,174 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { X, Globe, Languages } from 'lucide-react';
+import { X, Languages } from 'lucide-react';
 
-declare global {
-  interface Window {
-    google: any;
-    googleTranslateElementInit: () => void;
-  }
+function getCookie(name: string) {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? decodeURIComponent(match[2]) : null;
+}
+
+function setTranslateCookies(langPair: string) {
+  // Set on root domain and current path
+  document.cookie = `googtrans=${langPair}; path=/`;
+  document.cookie = `googtrans=${langPair}; path=/; domain=${window.location.hostname}`;
+}
+
+function clearTranslateCookies() {
+  const past = 'Thu, 01 Jan 1970 00:00:01 GMT';
+  document.cookie = `googtrans=; expires=${past}; path=/`;
+  document.cookie = `googtrans=; expires=${past}; path=/; domain=${window.location.hostname}`;
 }
 
 export default function LanguagePrompt() {
   const [show, setShow] = useState(false);
-  const [translated, setTranslated] = useState(false);
   const [closing, setClosing] = useState(false);
 
   useEffect(() => {
-    // Use sessionStorage so it resets every visit (new tab/session)
-    // Each page load/visit will ask again
+    // Reset translation cookie on every visit (new page load)
+    clearTranslateCookies();
+
+    // Inject the hidden Google Translate element (needed to activate)
+    injectGoogleTranslateScript();
+
+    // Show prompt after 800ms delay
     const answered = sessionStorage.getItem('langPromptAnswered');
     if (!answered) {
-      // Small delay so the page renders first
       const t = setTimeout(() => setShow(true), 800);
       return () => clearTimeout(t);
     }
   }, []);
 
-  function handleYes() {
-    // Inject Google Translate script and trigger Bangla translation
-    injectGoogleTranslate(() => {
-      triggerTranslation('bn');
-      setTranslated(true);
-    });
-    sessionStorage.setItem('langPromptAnswered', 'yes');
-    dismiss();
-  }
+  function injectGoogleTranslateScript() {
+    if (document.getElementById('google-translate-script')) return;
 
-  function handleNo() {
-    sessionStorage.setItem('langPromptAnswered', 'no');
-    dismiss();
-  }
-
-  function dismiss() {
-    setClosing(true);
-    setTimeout(() => setShow(false), 400);
-  }
-
-  function injectGoogleTranslate(callback: () => void) {
-    if (document.getElementById('google-translate-script')) {
-      callback();
-      return;
-    }
-
-    window.googleTranslateElementInit = () => {
-      new window.google.translate.TranslateElement(
+    (window as any).googleTranslateElementInit = () => {
+      new (window as any).google.translate.TranslateElement(
         { pageLanguage: 'en', includedLanguages: 'bn', autoDisplay: false },
         'google_translate_element'
       );
-      setTimeout(callback, 600);
     };
 
     const script = document.createElement('script');
     script.id = 'google-translate-script';
-    script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+    script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
     script.async = true;
     document.head.appendChild(script);
   }
 
-  function triggerTranslation(lang: string) {
-    // Find and click the Google Translate combo
-    const maxAttempts = 20;
-    let attempts = 0;
-    const interval = setInterval(() => {
-      const select = document.querySelector('.goog-te-combo') as HTMLSelectElement;
-      if (select) {
-        select.value = lang;
-        select.dispatchEvent(new Event('change'));
-        clearInterval(interval);
-      } else if (++attempts >= maxAttempts) {
-        clearInterval(interval);
-      }
-    }, 300);
+  function handleYes() {
+    // Set Google Translate cookie to Bengali then reload
+    setTranslateCookies('/en/bn');
+    sessionStorage.setItem('langPromptAnswered', 'yes');
+    dismiss(() => window.location.reload());
   }
 
-  if (!show) return (
-    <>
-      {/* Hidden Google Translate element (needed for the widget) */}
-      <div id="google_translate_element" className="hidden" />
-      {/* Hide the ugly Google bar */}
-      <style>{`
-        .goog-te-banner-frame, .skiptranslate { display: none !important; }
-        body { top: 0 !important; }
-        .goog-te-gadget { display: none !important; }
-      `}</style>
-    </>
-  );
+  function handleNo() {
+    clearTranslateCookies();
+    sessionStorage.setItem('langPromptAnswered', 'no');
+    dismiss();
+  }
+
+  function dismiss(callback?: () => void) {
+    setClosing(true);
+    setTimeout(() => {
+      setShow(false);
+      callback?.();
+    }, 350);
+  }
 
   return (
     <>
-      {/* Hidden Google Translate element */}
-      <div id="google_translate_element" className="hidden" />
-      {/* Hide the ugly Google bar */}
+      {/* Hidden Google Translate widget container */}
+      <div id="google_translate_element" className="hidden" style={{ display: 'none' }} />
+
+      {/* Hide the ugly Google Translate bar */}
       <style>{`
-        .goog-te-banner-frame, .skiptranslate { display: none !important; }
-        body { top: 0 !important; }
-        .goog-te-gadget { display: none !important; }
+        .goog-te-banner-frame.skiptranslate,
+        .goog-te-banner-frame,
+        #goog-gt-tt,
+        .goog-tooltip,
+        .goog-tooltip:hover,
+        .goog-text-highlight {
+          display: none !important;
+          visibility: hidden !important;
+        }
+        body {
+          top: 0 !important;
+          position: static !important;
+        }
+        .skiptranslate {
+          display: none !important;
+        }
       `}</style>
 
-      {/* Overlay backdrop */}
-      <div
-        className={`fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-4 transition-all duration-400 ${closing ? 'opacity-0' : 'opacity-100'}`}
-        style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
-        onClick={handleNo}
-      >
-        {/* Modal Card */}
-        <div
-          className={`relative w-full max-w-sm glass rounded-3xl border border-white/10 p-7 shadow-2xl shadow-black/60 transition-all duration-400 ${
-            closing ? 'translate-y-8 opacity-0 scale-95' : 'translate-y-0 opacity-100 scale-100'
-          }`}
-          onClick={e => e.stopPropagation()}
-        >
-          {/* Close button */}
-          <button
+      {show && (
+        <>
+          {/* Backdrop */}
+          <div
+            className={`fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-4 transition-all duration-350 ${
+              closing ? 'opacity-0' : 'opacity-100'
+            }`}
+            style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)' }}
             onClick={handleNo}
-            className="absolute top-4 right-4 w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/30 hover:text-white transition-all"
           >
-            <X size={14} />
-          </button>
-
-          {/* Icon */}
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500/20 to-emerald-500/10 border border-green-500/20 flex items-center justify-center mb-5 shadow-lg shadow-green-500/10">
-            <Languages size={26} className="text-green-400" />
-          </div>
-
-          {/* Title */}
-          <h2 className="font-display font-black text-xl text-white mb-1">বাংলায় দেখুন?</h2>
-          <p className="text-sm text-white/50 mb-1">Do you want to view this website in <span className="text-white/80 font-semibold">Bangla</span>?</p>
-          <p className="text-xs text-white/30 mb-6">আপনি কি এই ওয়েবসাইটটি বাংলায় দেখতে চান?</p>
-
-          {/* Buttons */}
-          <div className="flex flex-col gap-3">
-            <button
-              onClick={handleYes}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold text-sm flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-green-500/20"
+            {/* Modal */}
+            <div
+              className={`relative w-full max-w-sm rounded-3xl border border-white/10 p-7 shadow-2xl shadow-black/70 transition-all duration-350 ${
+                closing ? 'translate-y-10 opacity-0 scale-95' : 'translate-y-0 opacity-100 scale-100'
+              }`}
+              style={{ background: 'linear-gradient(135deg, #0f172a 60%, #1e1b4b 100%)' }}
+              onClick={e => e.stopPropagation()}
             >
-              <Globe size={16} />
-              হ্যাঁ, বাংলায় দেখুন — Yes, Translate
-            </button>
-            <button
-              onClick={handleNo}
-              className="w-full py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white/60 hover:text-white font-semibold text-sm transition-all"
-            >
-              No, keep in English
-            </button>
-          </div>
+              {/* Close */}
+              <button
+                onClick={handleNo}
+                className="absolute top-4 right-4 w-7 h-7 rounded-full bg-white/5 hover:bg-white/15 flex items-center justify-center text-white/30 hover:text-white transition-all"
+              >
+                <X size={13} />
+              </button>
 
-          {/* Note */}
-          <p className="text-[10px] text-white/20 text-center mt-4 uppercase tracking-widest">
-            Powered by Google Translate
-          </p>
-        </div>
-      </div>
+              {/* Icon */}
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 shadow-lg"
+                style={{ background: 'linear-gradient(135deg, rgba(34,197,94,0.2), rgba(16,185,129,0.1))', border: '1px solid rgba(34,197,94,0.25)' }}>
+                <Languages size={26} className="text-emerald-400" />
+              </div>
+
+              {/* Text */}
+              <h2 className="font-display font-black text-xl text-white mb-1">বাংলায় দেখুন?</h2>
+              <p className="text-sm text-white/50 mb-1">
+                Do you want to view this website in{' '}
+                <span className="text-white/80 font-semibold">Bangla</span>?
+              </p>
+              <p className="text-xs text-white/30 mb-6">
+                আপনি কি এই ওয়েবসাইটটি বাংলায় দেখতে চান?
+              </p>
+
+              {/* Buttons */}
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={handleYes}
+                  className="w-full py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-emerald-500/20"
+                  style={{ background: 'linear-gradient(135deg, #22c55e, #10b981)', color: 'white' }}
+                >
+                  <Languages size={16} />
+                  হ্যাঁ — Yes, Translate to Bangla
+                </button>
+                <button
+                  onClick={handleNo}
+                  className="w-full py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white/50 hover:text-white/80 font-semibold text-sm transition-all"
+                >
+                  No, keep in English
+                </button>
+              </div>
+
+              <p className="text-[10px] text-white/15 text-center mt-4 uppercase tracking-widest">
+                Powered by Google Translate
+              </p>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }

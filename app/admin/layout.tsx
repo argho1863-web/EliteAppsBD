@@ -84,7 +84,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gold-gradient flex items-center justify-center font-black text-brand-navy text-xs">
-              {session.user?.name?.[0]}
+              {session?.user?.name?.[0]}
             </div>
           </div>
         </header>

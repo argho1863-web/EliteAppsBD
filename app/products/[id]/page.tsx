@@ -206,9 +206,13 @@ export default function ProductDetailPage() {
                 effectivePrice ? (
                   <span className="text-4xl font-black text-gold-gradient">৳{effectivePrice}</span>
                 ) : (
-                  <span className="text-xl font-bold text-brand-gold bg-brand-gold/10 px-4 py-2 rounded-xl border border-brand-gold/20">
-                    {isSubscription ? 'Select a Period' : 'Select an Amount'}
-                  </span>
+                  product.priceMin && product.priceMax ? (
+                    <span className="text-4xl font-black text-gold-gradient">৳{product.priceMin}–৳{product.priceMax}</span>
+                  ) : (
+                    <span className="text-xl font-bold text-brand-gold bg-brand-gold/10 px-4 py-2 rounded-xl border border-brand-gold/20">
+                      {isSubscription ? 'Select a Period' : 'Select an Amount'}
+                    </span>
+                  )
                 )
               ) : (
                 <span className="text-4xl font-black text-gold-gradient">৳{product.price}</span>

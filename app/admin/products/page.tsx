@@ -5,10 +5,10 @@ import toast from 'react-hot-toast';
 import { Plus, Trash2, Pencil, X, Upload, Star, Package, AlertTriangle } from 'lucide-react';
 
 interface Variant { label: string; price: number; soldOut?: boolean; }
-interface Product { _id: string; name: string; description: string; price: number; originalPrice?: number; images: string[]; category: string; stock: number; featured: boolean; rating: number; soldOut?: boolean; productType?: 'app' | 'subscription' | 'topup'; periods?: Variant[]; topupAmounts?: Variant[]; requiredDetails?: { label: string; placeholder: string; required: boolean }[]; reviews?: number; }
+interface Product { _id: string; name: string; description: string; price: number; originalPrice?: number; priceMin?: number; priceMax?: number; images: string[]; category: string; stock: number; featured: boolean; rating: number; soldOut?: boolean; productType?: 'app' | 'subscription' | 'topup'; periods?: Variant[]; topupAmounts?: Variant[]; requiredDetails?: { label: string; placeholder: string; required: boolean }[]; reviews?: number; }
 interface Category { _id: string; name: string; }
 
-const emptyForm = { name: '', description: '', price: '', originalPrice: '', category: '', stock: '99', featured: false, rating: '4.5', soldOut: false, productType: 'app' as 'app' | 'subscription' | 'topup', periods: [] as Variant[], topupAmounts: [] as Variant[], requiredDetails: [] as { label: string; placeholder: string; required: boolean }[], reviews: '0' };
+const emptyForm = { name: '', description: '', price: '', originalPrice: '', priceMin: '', priceMax: '', category: '', stock: '99', featured: false, rating: '4.5', soldOut: false, productType: 'app' as 'app' | 'subscription' | 'topup', periods: [] as Variant[], topupAmounts: [] as Variant[], requiredDetails: [] as { label: string; placeholder: string; required: boolean }[], reviews: '0' };
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -73,7 +73,9 @@ export default function AdminProductsPage() {
     const payload = { 
       ...form, 
       price: form.productType === 'app' ? parseFloat(form.price) : 0, 
-      originalPrice: form.originalPrice ? parseFloat(form.originalPrice) : undefined, 
+      originalPrice: form.originalPrice ? parseFloat(form.originalPrice) : undefined,
+      priceMin: form.priceMin ? parseFloat(form.priceMin) : undefined,
+      priceMax: form.priceMax ? parseFloat(form.priceMax) : undefined,
       stock: parseInt(form.stock), 
       rating: parseFloat(form.rating), 
       reviews: parseInt(form.reviews) || 0,
@@ -116,6 +118,8 @@ export default function AdminProductsPage() {
       description: p.description, 
       price: (p.price || 0).toString(), 
       originalPrice: p.originalPrice?.toString() || '', 
+      priceMin: p.priceMin?.toString() || '',
+      priceMax: p.priceMax?.toString() || '',
       category: p.category, 
       stock: p.stock.toString(), 
       featured: p.featured, 
@@ -174,6 +178,18 @@ export default function AdminProductsPage() {
                   <label className="text-[10px] text-white/30 uppercase tracking-[0.2em] mb-2 block font-bold">Fixed Price (৳)</label>
                   <input className="input-dark h-12 px-5 font-bold" type="number" min="0" step="1" value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} placeholder="299" required={form.productType === 'app'} />
                 </div>
+              )}
+              {(form.productType === 'subscription' || form.productType === 'topup') && (
+                <>
+                  <div>
+                    <label className="text-[10px] text-emerald-400 uppercase tracking-[0.2em] mb-2 block font-black">Min Price (৳)</label>
+                    <input className="input-dark h-12 px-5 font-bold text-emerald-400" type="number" min="0" step="1" value={form.priceMin} onChange={e => setForm(f => ({ ...f, priceMin: e.target.value }))} placeholder="e.g. 100" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-rose-400 uppercase tracking-[0.2em] mb-2 block font-black">Max Price (৳)</label>
+                    <input className="input-dark h-12 px-5 font-bold text-rose-400" type="number" min="0" step="1" value={form.priceMax} onChange={e => setForm(f => ({ ...f, priceMax: e.target.value }))} placeholder="e.g. 350" />
+                  </div>
+                </>
               )}
               <div>
                 <label className="text-[10px] text-white/30 uppercase tracking-[0.2em] mb-2 block font-bold">Original Price (৳)</label>

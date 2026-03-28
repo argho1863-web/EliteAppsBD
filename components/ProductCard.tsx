@@ -9,8 +9,10 @@ import StockModal from './StockModal';
 
 interface Product {
   _id: string; name: string; price: number; originalPrice?: number;
+  priceMin?: number; priceMax?: number;
   images: string[]; category: string; featured: boolean;
   rating: number; reviews: number; stock: number; soldOut?: boolean;
+  productType?: 'app' | 'subscription' | 'topup';
 }
 
 export default function ProductCard({ product, index = 0 }: { product: Product; index?: number }) {
@@ -91,7 +93,13 @@ export default function ProductCard({ product, index = 0 }: { product: Product; 
           </div>
           <div className="flex items-end justify-between">
             <div>
-              <span className={`text-lg font-bold ${product.soldOut ? 'text-white/30' : 'text-gold-gradient'}`}>৳{product.price.toFixed(0)}</span>
+              {(product.productType === 'subscription' || product.productType === 'topup') && product.priceMin && product.priceMax ? (
+                <span className={`text-lg font-bold ${product.soldOut ? 'text-white/30' : 'text-gold-gradient'}`}>
+                  ৳{product.priceMin}–{product.priceMax}
+                </span>
+              ) : (
+                <span className={`text-lg font-bold ${product.soldOut ? 'text-white/30' : 'text-gold-gradient'}`}>৳{product.price.toFixed(0)}</span>
+              )}
               {product.originalPrice && <span className="text-xs text-white/30 line-through ml-2">৳{product.originalPrice}</span>}
             </div>
             {product.soldOut ? (

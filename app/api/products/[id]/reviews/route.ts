@@ -5,9 +5,10 @@ import { auth } from '@/auth';
 export const runtime = 'edge';
 
 // GET public approved reviews for a product
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const reviews = await db.find('reviews', { productId: params.id, isApproved: true });
+    const { id } = await params;
+    const reviews = await db.find('reviews', { productId: id, isApproved: true });
     // Sort reviews by creation date descending
     const sorted = reviews.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     return NextResponse.json(sorted);
@@ -17,13 +18,14 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 }
 
 // POST a new review
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: 'Must be logged in to review' }, { status: 401 });
     }
 
+    const { id } = await params;
     const body = await req.json();
     const { rating, comment } = body;
 
@@ -32,7 +34,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     }
 
     const review = {
-      productId: params.id,
+      productId: id,
       userName: session.user.name,
       userEmail: session.user.email,
       rating: Number(rating),

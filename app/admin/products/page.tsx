@@ -5,10 +5,10 @@ import toast from 'react-hot-toast';
 import { Plus, Trash2, Pencil, X, Upload, Star, Package, AlertTriangle } from 'lucide-react';
 
 interface Variant { label: string; price: number; }
-interface Product { _id: string; name: string; description: string; price: number; originalPrice?: number; images: string[]; category: string; stock: number; featured: boolean; rating: number; soldOut?: boolean; productType?: 'app' | 'subscription' | 'topup'; periods?: Variant[]; topupAmounts?: Variant[]; }
+interface Product { _id: string; name: string; description: string; price: number; originalPrice?: number; images: string[]; category: string; stock: number; featured: boolean; rating: number; soldOut?: boolean; productType?: 'app' | 'subscription' | 'topup'; periods?: Variant[]; topupAmounts?: Variant[]; requiredDetails?: { label: string; placeholder: string; required: boolean }[]; }
 interface Category { _id: string; name: string; }
 
-const emptyForm = { name: '', description: '', price: '', originalPrice: '', category: '', stock: '99', featured: false, rating: '4.5', soldOut: false, productType: 'app' as 'app' | 'subscription' | 'topup', periods: [] as Variant[], topupAmounts: [] as Variant[] };
+const emptyForm = { name: '', description: '', price: '', originalPrice: '', category: '', stock: '99', featured: false, rating: '4.5', soldOut: false, productType: 'app' as 'app' | 'subscription' | 'topup', periods: [] as Variant[], topupAmounts: [] as Variant[], requiredDetails: [] as { label: string; placeholder: string; required: boolean }[] };
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -105,7 +105,8 @@ export default function AdminProductsPage() {
       soldOut: p.soldOut || false,
       productType: p.productType || 'app',
       periods: p.periods || [],
-      topupAmounts: p.topupAmounts || []
+      topupAmounts: p.topupAmounts || [],
+      requiredDetails: p.requiredDetails || []
     });
     setImages(p.images || []); setEditId(p._id); setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -242,6 +243,55 @@ export default function AdminProductsPage() {
                 </div>
               </div>
             )}
+
+            {/* Required Customer Details */}
+            <div className="lg:col-span-2 glass p-6 sm:p-8 rounded-[2rem] border border-blue-400/20 bg-blue-400/5 mb-4 shadow-xl shadow-blue-400/5">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+                <div>
+                  <h3 className="text-base font-black text-blue-400 uppercase tracking-[0.2em]">Customer Information Requirement</h3>
+                  <p className="text-[10px] text-white/30 uppercase mt-1">Specify info customers must provide (e.g., Player ID, WhatsApp, Account Email)</p>
+                </div>
+                <button type="button" onClick={() => setForm(f => ({ ...f, requiredDetails: [...f.requiredDetails, { label: '', placeholder: '', required: true }] }))} className="w-full sm:w-auto bg-blue-400 text-brand-navy px-6 py-2.5 rounded-xl font-black text-xs hover:scale-105 transition-transform flex items-center justify-center gap-2 shadow-lg shadow-blue-400/20">
+                  <Plus size={14} /> Add Requirement
+                </button>
+              </div>
+              {form.requiredDetails.length === 0 && <div className="text-center py-10 border-2 border-dashed border-white/5 rounded-2xl"><p className="text-xs text-white/20 uppercase tracking-widest">No extra details required</p></div>}
+              <div className="grid grid-cols-1 gap-4">
+                {form.requiredDetails.map((req, i) => (
+                  <div key={`req-${i}`} className="flex flex-col sm:flex-row gap-4 items-end glass bg-white/5 p-4 rounded-2xl border border-white/10 group">
+                    <div className="w-full sm:flex-[2]">
+                      <label className="text-[10px] text-white/20 uppercase tracking-widest mb-1.5 block font-bold ml-1">Label (e.g., WhatsApp Number)</label>
+                      <input className="input-dark h-14 px-6 text-[13px] font-bold" placeholder="WhatsApp Number" value={req.label} onChange={e => {
+                        const newR = [...form.requiredDetails];
+                        newR[i] = { ...newR[i], label: e.target.value };
+                        setForm(f => ({ ...f, requiredDetails: newR }));
+                      }} />
+                    </div>
+                    <div className="w-full sm:flex-[2]">
+                      <label className="text-[10px] text-white/20 uppercase tracking-widest mb-1.5 block font-bold ml-1">Placeholder Text</label>
+                      <input className="input-dark h-14 px-6 text-[13px] font-medium" placeholder="Enter your 11-digit number" value={req.placeholder} onChange={e => {
+                        const newR = [...form.requiredDetails];
+                        newR[i] = { ...newR[i], placeholder: e.target.value };
+                        setForm(f => ({ ...f, requiredDetails: newR }));
+                      }} />
+                    </div>
+                    <div className="w-full sm:flex-1 min-w-[120px] flex items-center justify-center h-14 bg-black/20 rounded-xl px-4 border border-white/5">
+                      <label className="flex items-center gap-2 cursor-pointer w-full justify-center">
+                        <input type="checkbox" className="w-4 h-4 accent-blue-400" checked={req.required} onChange={e => {
+                          const newR = [...form.requiredDetails];
+                          newR[i] = { ...newR[i], required: e.target.checked };
+                          setForm(f => ({ ...f, requiredDetails: newR }));
+                        }} />
+                        <span className="text-xs font-bold text-white/70 uppercase tracking-wider">Required</span>
+                      </label>
+                    </div>
+                    <button type="button" onClick={() => setForm(f => ({ ...f, requiredDetails: f.requiredDetails.filter((_, j) => j !== i) }))} className="w-full sm:w-14 h-14 bg-red-400/10 text-red-400 hover:bg-red-400 hover:text-white rounded-xl flex items-center justify-center transition-all">
+                      <Trash2 size={20} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
 
             <div>
               <label className="text-xs text-white/40 uppercase tracking-wider mb-1.5 block">Category *</label>

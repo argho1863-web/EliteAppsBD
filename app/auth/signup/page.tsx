@@ -90,7 +90,7 @@ function SignUpContent() {
               <AlertCircle size={18} className="text-amber-400" />
             </div>
             <p className="text-xs text-amber-100/70 leading-relaxed font-medium">
-              <strong className="text-amber-400">Pro Tip:</strong> Use a real email address to ensure you receive your digital assets and order receipts instantly.
+              <strong className="text-amber-400">Important:</strong> Use your working email because the order details and delivery information will be sent to it.
             </p>
           </div>
         )}

@@ -66,7 +66,7 @@ function SignInContent() {
             <AlertCircle size={18} className="text-amber-400" />
           </div>
           <p className="text-xs text-amber-100/70 leading-relaxed font-medium">
-            <strong className="text-amber-400">Important:</strong> Please use an active email address. Order details and login credentials will be delivered directly to your inbox.
+            <strong className="text-amber-400">Important:</strong> Use your working email because the order details and delivery information will be sent to it.
           </p>
         </div>
 

@@ -3,6 +3,7 @@ import { Playfair_Display, DM_Sans, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/components/Providers';
 import { Toaster } from 'react-hot-toast';
+import LanguagePrompt from '@/components/LanguagePrompt';
 
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-display', display: 'swap' });
 const dmSans = DM_Sans({ subsets: ['latin'], variable: '--font-body', display: 'swap' });
@@ -22,6 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${playfair.variable} ${dmSans.variable} ${jetbrains.variable}`}>
       <body className="font-body bg-brand-navy text-white antialiased">
         <Providers>
+          <LanguagePrompt />
           {children}
           <Toaster
             position="top-right"

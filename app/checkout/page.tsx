@@ -152,6 +152,15 @@ export default function CheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           <div className="lg:col-span-3 space-y-6">
 
+            {/* Email delivery alert */}
+            <div className="flex items-start gap-3 glass rounded-2xl p-4 border border-blue-400/30 bg-blue-400/5">
+              <span className="text-blue-400 text-lg mt-0.5">📧</span>
+              <div>
+                <p className="text-sm font-bold text-blue-300">Product Will Be Delivered to Your Signed-In Email</p>
+                <p className="text-xs text-white/40 mt-0.5">Make sure <span className="text-white/70 font-semibold">{session?.user?.email}</span> is a working email address you check regularly.</p>
+              </div>
+            </div>
+
             {/* Details summary */}
             {hasDetails && (
               <div className="glass rounded-2xl p-5 border border-brand-gold/20 bg-brand-gold/5">

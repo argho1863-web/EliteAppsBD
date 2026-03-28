@@ -27,10 +27,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     const { id } = await params;
     const body = await req.json();
-    const { rating, comment } = body;
+    const { rating } = body;
 
-    if (!rating || !comment) {
-      return NextResponse.json({ error: 'Rating and comment are required' }, { status: 400 });
+    if (!rating) {
+      return NextResponse.json({ error: 'Rating is required' }, { status: 400 });
     }
 
     const review = {
@@ -38,7 +38,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       userName: session.user.name,
       userEmail: session.user.email,
       rating: Number(rating),
-      comment,
+      comment: '', // Now optional/empty
       isApproved: false, // Default to false
       createdAt: new Date().toISOString(),
     };

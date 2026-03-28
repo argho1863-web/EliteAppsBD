@@ -49,7 +49,6 @@ export default function ProductDetailPage() {
   // Reviews state
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewRating, setReviewRating] = useState(5);
-  const [reviewComment, setReviewComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [hasReviewed, setHasReviewed] = useState(false);
   const [showStockModal, setShowStockModal] = useState(false);
@@ -120,18 +119,15 @@ export default function ProductDetailPage() {
   async function handleSubmitReview(e: React.FormEvent) {
     e.preventDefault();
     if (!session) { router.push(`/auth/signin?callbackUrl=/products/${id}`); return; }
-    if (!reviewComment.trim()) { toast.error('Please write a comment'); return; }
-    setSubmitting(true);
     try {
       const res = await fetch(`/api/products/${id}/reviews`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rating: reviewRating, comment: reviewComment }),
+        body: JSON.stringify({ rating: reviewRating }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       toast.success('Review submitted!');
-      setReviewComment('');
       setReviewRating(5);
       // Refresh reviews
       const updated = await fetch(`/api/products/${id}/reviews`).then(r => r.json());
@@ -327,16 +323,6 @@ export default function ProductDetailPage() {
                   <label className="text-xs text-white/40 uppercase tracking-wider mb-2 block">Your Rating</label>
                   <StarPicker value={reviewRating} onChange={setReviewRating} />
                 </div>
-                <div>
-                  <label className="text-xs text-white/40 uppercase tracking-wider mb-1.5 block">Your Review</label>
-                  <textarea
-                    value={reviewComment}
-                    onChange={e => setReviewComment(e.target.value)}
-                    placeholder="Share your experience with this product..."
-                    className="input-dark min-h-[100px] resize-none w-full"
-                    required
-                  />
-                </div>
                 <button
                   type="submit"
                   disabled={submitting}
@@ -344,7 +330,7 @@ export default function ProductDetailPage() {
                 >
                   {submitting
                     ? <><div className="w-4 h-4 border-2 border-brand-navy/40 border-t-brand-navy rounded-full animate-spin" /> Submitting...</>
-                    : <><Send size={14} /> Submit Review</>
+                    : <><Send size={14} /> Submit Rating</>
                   }
                 </button>
               </form>
@@ -372,7 +358,6 @@ export default function ProductDetailPage() {
                       ))}
                     </div>
                   </div>
-                  <p className="text-sm text-white/60 leading-relaxed">{review.comment}</p>
                 </div>
               ))}
             </div>

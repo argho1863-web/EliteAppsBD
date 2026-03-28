@@ -103,7 +103,7 @@ export default function AdminReviewsPage() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-white/2 border-b border-white/5">
-                    {['Date', 'Customer', 'Rating', 'Comment', 'Status', 'Actions'].map(h => (
+                    {['Date', 'Customer', 'Rating', 'Status', 'Actions'].map(h => (
                       <th key={h} className="px-6 py-5 text-[10px] text-white/30 font-black uppercase tracking-[0.2em]">{h}</th>
                     ))}
                   </tr>
@@ -126,9 +126,6 @@ export default function AdminReviewsPage() {
                             <Star key={s} size={12} className={s <= review.rating ? 'text-amber-400 fill-amber-400' : 'text-white/20'} />
                           ))}
                         </div>
-                      </td>
-                      <td className="px-6 py-4 max-w-xs">
-                        <p className="text-sm text-white/70 line-clamp-2" title={review.comment}>{review.comment}</p>
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl border ${

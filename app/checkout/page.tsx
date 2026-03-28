@@ -41,16 +41,30 @@ export default function CheckoutPage() {
     } catch {}
 
     // Check if any cart item requires details
-    const hasRequiredFields = items.some(({ product }: any) =>
-      product.requiredDetails?.some((f: any) => f.required)
-    );
+    const requiredLabels = new Set<string>();
+    items.forEach(({ product }: any) => {
+      if (product.requiredDetails && Array.isArray(product.requiredDetails)) {
+        product.requiredDetails.forEach((f: any) => {
+          if (f.required && !f.label?.toLowerCase().includes('password')) {
+            requiredLabels.add(f.label);
+          }
+        });
+      }
+    });
 
-    if (hasRequiredFields) {
+    if (requiredLabels.size > 0) {
       try {
         const saved = localStorage.getItem('eliteCustomerDetails');
         if (!saved) {
           router.push('/details');
           return;
+        }
+        const parsed = JSON.parse(saved);
+        for (const label of requiredLabels) {
+          if (!parsed[label] || !parsed[label].trim()) {
+            router.push('/details');
+            return;
+          }
         }
       } catch {
         router.push('/details');

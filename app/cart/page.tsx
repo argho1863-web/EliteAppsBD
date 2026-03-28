@@ -1,4 +1,5 @@
 'use client';
+import { useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -12,6 +13,11 @@ export default function CartPage() {
   const { items, removeItem, updateQuantity, totalPrice, clearCart } = useCart();
   const { data: session } = useSession();
   const router = useRouter();
+
+  useEffect(() => {
+    // Clear previously saved customer details to force re-entry
+    try { localStorage.removeItem('eliteCustomerDetails'); } catch {}
+  }, []);
 
   const handleCheckout = () => {
     if (!session) { router.push('/auth/signin?callbackUrl=/checkout'); return; }

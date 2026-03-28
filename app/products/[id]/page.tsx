@@ -225,11 +225,22 @@ export default function ProductDetailPage() {
                 <p className="text-xs text-white/40 uppercase tracking-[0.2em] mb-4 font-bold">Select Period</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {product.periods.map((p: any, i: number) => (
-                    <button key={i} type="button" onClick={() => setSelectedPeriod(p)}
-                      className={`relative flex items-center justify-between px-5 py-4 rounded-xl border-2 transition-all ${selectedPeriod?.label === p.label ? 'border-amber-400 bg-amber-400/10 shadow-lg shadow-amber-400/10' : 'border-white/10 hover:border-white/20 bg-white/5'}`}>
-                      <span className={`text-sm font-bold ${selectedPeriod?.label === p.label ? 'text-amber-400' : 'text-white/70'}`}>{p.label}</span>
-                      <span className={`text-sm font-black ${selectedPeriod?.label === p.label ? 'text-amber-400' : 'text-white/50'}`}>৳{p.price}</span>
-                      {selectedPeriod?.label === p.label && <Check size={14} className="absolute top-2 right-2 text-amber-400" />}
+                    <button key={i} type="button"
+                      disabled={p.soldOut}
+                      onClick={() => !p.soldOut && setSelectedPeriod(p)}
+                      className={`relative flex items-center justify-between px-5 py-4 rounded-xl border-2 transition-all ${
+                        p.soldOut
+                          ? 'border-red-500/20 bg-red-500/5 opacity-60 cursor-not-allowed'
+                          : selectedPeriod?.label === p.label
+                          ? 'border-amber-400 bg-amber-400/10 shadow-lg shadow-amber-400/10'
+                          : 'border-white/10 hover:border-white/20 bg-white/5'
+                      }`}>
+                      <span className={`text-sm font-bold ${p.soldOut ? 'text-white/30' : selectedPeriod?.label === p.label ? 'text-amber-400' : 'text-white/70'}`}>{p.label}</span>
+                      {p.soldOut
+                        ? <span className="text-[10px] font-black uppercase tracking-widest text-red-400 bg-red-500/10 px-2 py-1 rounded-lg border border-red-500/20">Sold Out</span>
+                        : <span className={`text-sm font-black ${selectedPeriod?.label === p.label ? 'text-amber-400' : 'text-white/50'}`}>৳{p.price}</span>
+                      }
+                      {selectedPeriod?.label === p.label && !p.soldOut && <Check size={14} className="absolute top-2 right-2 text-amber-400" />}
                     </button>
                   ))}
                 </div>
@@ -241,11 +252,22 @@ export default function ProductDetailPage() {
                 <p className="text-xs text-white/40 uppercase tracking-[0.2em] mb-4 font-bold">Select Amount</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {product.topupAmounts.map((a: any, i: number) => (
-                    <button key={i} type="button" onClick={() => setSelectedAmount(a)}
-                      className={`relative flex items-center justify-between px-5 py-4 rounded-xl border-2 transition-all ${selectedAmount?.label === a.label ? 'border-green-400 bg-green-400/10 shadow-lg shadow-green-400/10' : 'border-white/10 hover:border-white/20 bg-white/5'}`}>
-                      <span className={`text-sm font-bold ${selectedAmount?.label === a.label ? 'text-green-400' : 'text-white/70'}`}>{a.label}</span>
-                      <span className={`text-sm font-black ${selectedAmount?.label === a.label ? 'text-green-400' : 'text-white/50'}`}>৳{a.price}</span>
-                      {selectedAmount?.label === a.label && <Check size={14} className="absolute top-2 right-2 text-green-400" />}
+                    <button key={i} type="button"
+                      disabled={a.soldOut}
+                      onClick={() => !a.soldOut && setSelectedAmount(a)}
+                      className={`relative flex items-center justify-between px-5 py-4 rounded-xl border-2 transition-all ${
+                        a.soldOut
+                          ? 'border-red-500/20 bg-red-500/5 opacity-60 cursor-not-allowed'
+                          : selectedAmount?.label === a.label
+                          ? 'border-green-400 bg-green-400/10 shadow-lg shadow-green-400/10'
+                          : 'border-white/10 hover:border-white/20 bg-white/5'
+                      }`}>
+                      <span className={`text-sm font-bold ${a.soldOut ? 'text-white/30' : selectedAmount?.label === a.label ? 'text-green-400' : 'text-white/70'}`}>{a.label}</span>
+                      {a.soldOut
+                        ? <span className="text-[10px] font-black uppercase tracking-widest text-red-400 bg-red-500/10 px-2 py-1 rounded-lg border border-red-500/20">Sold Out</span>
+                        : <span className={`text-sm font-black ${selectedAmount?.label === a.label ? 'text-green-400' : 'text-white/50'}`}>৳{a.price}</span>
+                      }
+                      {selectedAmount?.label === a.label && !a.soldOut && <Check size={14} className="absolute top-2 right-2 text-green-400" />}
                     </button>
                   ))}
                 </div>
@@ -253,8 +275,16 @@ export default function ProductDetailPage() {
             )}
 
             <div className="flex flex-col sm:flex-row gap-4 mb-10">
-              <button onClick={handleBuyNow} className="w-full btn-gold py-4 rounded-xl font-bold flex items-center justify-center gap-2 text-base shadow-gold-strong transition-transform active:scale-95"><Zap size={18} /> Buy Now</button>
-              <button onClick={handleAddToCart} className="w-full glass border border-white/10 hover:border-brand-gold/30 py-4 rounded-xl font-bold text-base flex items-center justify-center gap-2 text-white/80 hover:text-white transition-all active:scale-95"><ShoppingCart size={18} /> Add to Cart</button>
+              <button onClick={handleBuyNow}
+                disabled={product.soldOut || (isSubscription && selectedPeriod?.soldOut) || (isTopup && selectedAmount?.soldOut)}
+                className="w-full btn-gold py-4 rounded-xl font-bold flex items-center justify-center gap-2 text-base shadow-gold-strong transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100">
+                <Zap size={18} /> Buy Now
+              </button>
+              <button onClick={handleAddToCart}
+                disabled={product.soldOut || (isSubscription && selectedPeriod?.soldOut) || (isTopup && selectedAmount?.soldOut)}
+                className="w-full glass border border-white/10 hover:border-brand-gold/30 py-4 rounded-xl font-bold text-base flex items-center justify-center gap-2 text-white/80 hover:text-white transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                <ShoppingCart size={18} /> Add to Cart
+              </button>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

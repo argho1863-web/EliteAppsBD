@@ -4,7 +4,7 @@ import Image from 'next/image';
 import toast from 'react-hot-toast';
 import { Plus, Trash2, Pencil, X, Upload, Star, Package, AlertTriangle } from 'lucide-react';
 
-interface Variant { label: string; price: number; }
+interface Variant { label: string; price: number; soldOut?: boolean; }
 interface Product { _id: string; name: string; description: string; price: number; originalPrice?: number; images: string[]; category: string; stock: number; featured: boolean; rating: number; soldOut?: boolean; productType?: 'app' | 'subscription' | 'topup'; periods?: Variant[]; topupAmounts?: Variant[]; requiredDetails?: { label: string; placeholder: string; required: boolean }[]; reviews?: number; }
 interface Category { _id: string; name: string; }
 
@@ -189,7 +189,7 @@ export default function AdminProductsPage() {
                     <h3 className="text-base font-black text-amber-400 uppercase tracking-[0.2em]">Subscription Periods</h3>
                     <p className="text-[10px] text-white/30 uppercase mt-1">Manage multiple pricing tiers</p>
                   </div>
-                  <button type="button" onClick={() => setForm(f => ({ ...f, periods: [...f.periods, { label: '', price: 0 }] }))} className="w-full sm:w-auto bg-amber-400 text-brand-navy px-6 py-2.5 rounded-xl font-black text-xs hover:scale-105 transition-transform flex items-center justify-center gap-2 shadow-lg shadow-amber-400/20">
+                  <button type="button" onClick={() => setForm(f => ({ ... f, periods: [...f.periods, { label: '', price: 0, soldOut: false }] }))} className="w-full sm:w-auto bg-amber-400 text-brand-navy px-6 py-2.5 rounded-xl font-black text-xs hover:scale-105 transition-transform flex items-center justify-center gap-2 shadow-lg shadow-amber-400/20">
                     <Plus size={14} /> Add Period
                   </button>
                 </div>
@@ -213,6 +213,16 @@ export default function AdminProductsPage() {
                           setForm(f => ({ ...f, periods: newP }));
                         }} />
                       </div>
+                      <div className="flex flex-col items-center justify-center px-4 h-14 bg-black/20 rounded-xl border border-white/5">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input type="checkbox" checked={p.soldOut} onChange={e => {
+                            const newP = [...form.periods];
+                            newP[i] = { ...newP[i], soldOut: e.target.checked };
+                            setForm(f => ({ ...f, periods: newP }));
+                          }} className="w-4 h-4 accent-red-500" />
+                          <span className="text-[10px] font-black uppercase tracking-tighter text-white/50">Sold Out</span>
+                        </label>
+                      </div>
                       <button type="button" onClick={() => setForm(f => ({ ...f, periods: f.periods.filter((_, j) => j !== i) }))} className="w-full sm:w-14 h-14 bg-red-400/10 text-red-400 hover:bg-red-400 hover:text-white rounded-xl flex items-center justify-center transition-all">
                         <Trash2 size={20} />
                       </button>
@@ -230,7 +240,7 @@ export default function AdminProductsPage() {
                     <h3 className="text-base font-black text-green-400 uppercase tracking-[0.2em]">Top Up Amounts</h3>
                     <p className="text-[10px] text-white/30 uppercase mt-1">Manage game currency packages</p>
                   </div>
-                  <button type="button" onClick={() => setForm(f => ({ ...f, topupAmounts: [...f.topupAmounts, { label: '', price: 0 }] }))} className="w-full sm:w-auto bg-green-400 text-brand-navy px-6 py-2.5 rounded-xl font-black text-xs hover:scale-105 transition-transform flex items-center justify-center gap-2 shadow-lg shadow-green-400/20">
+                  <button type="button" onClick={() => setForm(f => ({ ...f, topupAmounts: [...f.topupAmounts, { label: '', price: 0, soldOut: false }] }))} className="w-full sm:w-auto bg-green-400 text-brand-navy px-6 py-2.5 rounded-xl font-black text-xs hover:scale-105 transition-transform flex items-center justify-center gap-2 shadow-lg shadow-green-400/20">
                     <Plus size={14} /> Add Amount
                   </button>
                 </div>
@@ -253,6 +263,16 @@ export default function AdminProductsPage() {
                           newA[i] = { ...newA[i], price: parseFloat(e.target.value) || 0 };
                           setForm(f => ({ ...f, topupAmounts: newA }));
                         }} />
+                      </div>
+                      <div className="flex flex-col items-center justify-center px-4 h-14 bg-black/20 rounded-xl border border-white/5">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input type="checkbox" checked={a.soldOut} onChange={e => {
+                            const newA = [...form.topupAmounts];
+                            newA[i] = { ...newA[i], soldOut: e.target.checked };
+                            setForm(f => ({ ...f, topupAmounts: newA }));
+                          }} className="w-4 h-4 accent-red-500" />
+                          <span className="text-[10px] font-black uppercase tracking-tighter text-white/50">Sold Out</span>
+                        </label>
                       </div>
                       <button type="button" onClick={() => setForm(f => ({ ...f, topupAmounts: f.topupAmounts.filter((_, j) => j !== i) }))} className="w-full sm:w-14 h-14 bg-red-400/10 text-red-400 hover:bg-red-400 hover:text-white rounded-xl flex items-center justify-center transition-all">
                         <Trash2 size={20} />

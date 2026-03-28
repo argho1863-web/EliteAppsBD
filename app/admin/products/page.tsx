@@ -5,10 +5,10 @@ import toast from 'react-hot-toast';
 import { Plus, Trash2, Pencil, X, Upload, Star, Package, AlertTriangle } from 'lucide-react';
 
 interface Variant { label: string; price: number; }
-interface Product { _id: string; name: string; description: string; price: number; originalPrice?: number; images: string[]; category: string; stock: number; featured: boolean; rating: number; soldOut?: boolean; productType?: 'app' | 'subscription' | 'topup'; periods?: Variant[]; topupAmounts?: Variant[]; requiredDetails?: { label: string; placeholder: string; required: boolean }[]; }
+interface Product { _id: string; name: string; description: string; price: number; originalPrice?: number; images: string[]; category: string; stock: number; featured: boolean; rating: number; soldOut?: boolean; productType?: 'app' | 'subscription' | 'topup'; periods?: Variant[]; topupAmounts?: Variant[]; requiredDetails?: { label: string; placeholder: string; required: boolean }[]; reviews?: number; }
 interface Category { _id: string; name: string; }
 
-const emptyForm = { name: '', description: '', price: '', originalPrice: '', category: '', stock: '99', featured: false, rating: '4.5', soldOut: false, productType: 'app' as 'app' | 'subscription' | 'topup', periods: [] as Variant[], topupAmounts: [] as Variant[], requiredDetails: [] as { label: string; placeholder: string; required: boolean }[] };
+const emptyForm = { name: '', description: '', price: '', originalPrice: '', category: '', stock: '99', featured: false, rating: '4.5', soldOut: false, productType: 'app' as 'app' | 'subscription' | 'topup', periods: [] as Variant[], topupAmounts: [] as Variant[], requiredDetails: [] as { label: string; placeholder: string; required: boolean }[], reviews: '0' };
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -59,6 +59,7 @@ export default function AdminProductsPage() {
       originalPrice: form.originalPrice ? parseFloat(form.originalPrice) : undefined, 
       stock: parseInt(form.stock), 
       rating: parseFloat(form.rating), 
+      reviews: parseInt(form.reviews) || 0,
       images 
     };
     const url = editId ? `/api/products/${editId}` : '/api/products';
@@ -102,6 +103,7 @@ export default function AdminProductsPage() {
       stock: p.stock.toString(), 
       featured: p.featured, 
       rating: p.rating.toString(), 
+      reviews: p.reviews?.toString() || '0',
       soldOut: p.soldOut || false,
       productType: p.productType || 'app',
       periods: p.periods || [],
@@ -307,6 +309,10 @@ export default function AdminProductsPage() {
             <div>
               <label className="text-xs text-white/40 uppercase tracking-wider mb-1.5 block">Rating (0–5)</label>
               <input className="input-dark" type="number" min="0" max="5" step="0.1" value={form.rating} onChange={e => setForm(f => ({ ...f, rating: e.target.value }))} />
+            </div>
+            <div>
+              <label className="text-xs text-white/40 uppercase tracking-wider mb-1.5 block">Base Reviews Count</label>
+              <input className="input-dark" type="number" min="0" value={form.reviews} onChange={e => setForm(f => ({ ...f, reviews: e.target.value }))} placeholder="Fake initial count (e.g. 150)" />
             </div>
             <div className="flex flex-col gap-3 pt-2">
               <div className="flex items-center gap-3">

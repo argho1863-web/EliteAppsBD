@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
 
-
+export const runtime = 'edge';
 
 export async function POST(req: NextRequest) {
   try {

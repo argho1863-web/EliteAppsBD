@@ -163,6 +163,88 @@ export default function AdminDashboard() {
           {orders.length === 0 && <div className="text-center py-12 text-white/30 text-sm">No orders yet</div>}
         </div>
       </div>
+
+      {/* ── Reset Confirmation Modal ── */}
+      {showReset && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+          onClick={() => { if (!resetting) { setShowReset(false); setResetPassword(''); } }}
+        >
+          <div
+            className="glass border border-white/10 rounded-3xl p-8 w-full max-w-sm shadow-2xl space-y-6"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400">
+                  <RotateCcw size={16} />
+                </span>
+                <div>
+                  <h2 className="text-sm font-black text-white">Reset All Orders</h2>
+                  <p className="text-[11px] text-white/30">This cannot be undone</p>
+                </div>
+              </div>
+              {!resetting && (
+                <button onClick={() => { setShowReset(false); setResetPassword(''); }} className="text-white/30 hover:text-white transition-colors">
+                  <X size={18} />
+                </button>
+              )}
+            </div>
+
+            {/* Warning */}
+            <p className="text-xs text-white/50 leading-relaxed bg-red-500/5 border border-red-500/10 rounded-2xl px-4 py-3">
+              All order records and total revenue stats will be permanently deleted. Categories and products will remain untouched.
+            </p>
+
+            {/* Password Input */}
+            <div className="space-y-2">
+              <label className="text-[11px] text-white/40 uppercase font-black tracking-widest">Admin Password</label>
+              <div className="relative">
+                <input
+                  ref={passwordRef}
+                  type={showPass ? 'text' : 'password'}
+                  value={resetPassword}
+                  onChange={e => setResetPassword(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && !resetting && handleReset()}
+                  placeholder="Enter password to confirm"
+                  disabled={resetting}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 pr-10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-brand-gold/40 transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass(p => !p)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70 transition-colors"
+                >
+                  {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setShowReset(false); setResetPassword(''); }}
+                disabled={resetting}
+                className="flex-1 py-3 rounded-2xl text-xs font-black uppercase tracking-widest border border-white/10 text-white/50 hover:text-white hover:border-white/20 transition-all disabled:opacity-40"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReset}
+                disabled={resetting || !resetPassword.trim()}
+                className="flex-1 py-3 rounded-2xl text-xs font-black uppercase tracking-widest bg-red-500 text-white hover:bg-red-600 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {resetting ? (
+                  <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Resetting…</>
+                ) : (
+                  <><RotateCcw size={14} /> Confirm Reset</>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-      }
+}

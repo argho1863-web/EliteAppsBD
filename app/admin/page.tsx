@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { Package, ShoppingBag, Tag, DollarSign, Clock, CheckCircle, XCircle, RotateCcw, X, Eye, EyeOff } from 'lucide-react';
+import { Package, ShoppingBag, Tag, DollarSign, Clock, CheckCircle, XCircle, RotateCcw, X, Eye, EyeOff, Zap } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 
@@ -85,13 +85,22 @@ export default function AdminDashboard() {
           <p className="text-[10px] text-brand-gold uppercase tracking-[0.2em] font-black mb-2 px-1">Overview</p>
           <h1 className="text-responsive-h2 text-white">Dashboard</h1>
         </div>
-        <button
-          onClick={() => setShowReset(true)}
-          className="w-full sm:w-auto flex items-center justify-center gap-3 px-6 py-3 rounded-2xl border border-red-500/20 bg-red-500/5 text-red-500 hover:bg-red-500 hover:text-white transition-all text-xs font-black uppercase tracking-widest shadow-lg shadow-red-500/5"
-        >
-          <RotateCcw size={16} />
-          Reset All Orders
-        </button>
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          <Link
+            href="/admin/import"
+            className="flex items-center justify-center gap-3 px-6 py-3 rounded-2xl border border-purple-500/20 bg-purple-500/5 text-purple-400 hover:bg-purple-500 hover:text-white transition-all text-xs font-black uppercase tracking-widest shadow-lg shadow-purple-500/5"
+          >
+            <Zap size={16} />
+            AI Importer
+          </Link>
+          <button
+            onClick={() => setShowReset(true)}
+            className="flex items-center justify-center gap-3 px-6 py-3 rounded-2xl border border-red-500/20 bg-red-500/5 text-red-500 hover:bg-red-500 hover:text-white transition-all text-xs font-black uppercase tracking-widest shadow-lg shadow-red-500/5"
+          >
+            <RotateCcw size={16} />
+            Reset All Orders
+          </button>
+        </div>
       </div>
 
       {/* Stats Grid */}

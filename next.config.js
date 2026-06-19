@@ -19,6 +19,10 @@ const nextConfig = {
     }
     return config;
   },
+  experimental: {
+    // Cloudflare Pages compatibility
+    esmExternals: true,
+  },
 };
 
 module.exports = nextConfig;

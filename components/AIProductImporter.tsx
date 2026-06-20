@@ -133,7 +133,7 @@ export default function AIProductImporter() {
                     onChange={(e) => setUrl(e.target.value)}
                     placeholder="https://competitor-site.com"
                     disabled={loading}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition disabled:bg-gray-50 disabled:text-gray-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-gray-900 placeholder-gray-400 disabled:bg-gray-100 disabled:border-gray-200 disabled:cursor-not-allowed"
                   />
                   <p className="text-xs text-gray-500 mt-1">
                     Enter the full URL including https:// or http://
@@ -155,9 +155,9 @@ export default function AIProductImporter() {
                       max="500"
                       step="0.5"
                       disabled={loading}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition disabled:bg-gray-50 disabled:text-gray-500"
+                      className="w-full px-4 py-3 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-gray-900 placeholder-gray-400 disabled:bg-gray-100 disabled:border-gray-200 disabled:cursor-not-allowed"
                     />
-                    <span className="absolute right-4 top-3 text-gray-500 font-medium">
+                    <span className="absolute right-4 top-3 text-gray-500 font-medium pointer-events-none">
                       %
                     </span>
                   </div>

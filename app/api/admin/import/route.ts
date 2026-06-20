@@ -28,8 +28,8 @@ export interface ImportResponse {
  *
  * Request body:
  * {
- *   "url": "https://competitor-site.com",
- *   "markupPercentage": 5
+ * "url": "https://competitor-site.com",
+ * "markupPercentage": 5
  * }
  */
 export async function POST(req: NextRequest): Promise<NextResponse> {
@@ -74,19 +74,37 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     // Step 1: Scrape and clean HTML
     console.log(`[IMPORT] Starting scrape of ${url}`);
-    const scrapedData = await scrapeAndCleanHTML(url);
+    
+    let scrapedData;
+    try {
+      scrapedData = await scrapeAndCleanHTML(url);
+    } catch (scrapeError: any) {
+      console.error(`[IMPORT] Scraping execution failed:`, scrapeError);
+      return NextResponse.json(
+        {
+          success: false,
+          message: `Scraping failed: ${scrapeError.message || 'Illegal invocation context error'}`,
+          imported: 0,
+          failed: 0,
+          products: [],
+          errors: [scrapeError.message],
+        },
+        { status: 500 }
+      );
+    }
+
     console.log(
-      `[IMPORT] Scraped ${scrapedData.images.length} images from ${url}`
+      `[IMPORT] Scraped ${scrapedData.images?.length || 0} images from ${url}`
     );
 
     // Step 2: Parse products with AI
     console.log('[IMPORT] Parsing products with OpenRouter AI');
     const parsedData = await parseProductsWithAI(
       scrapedData.cleanHtml,
-      scrapedData.images
+      scrapedData.images || []
     );
     console.log(
-      `[IMPORT] AI extracted ${parsedData.products.length} products`
+      `[IMPORT] AI extracted ${parsedData.products?.length || 0} products`
     );
 
     // Step 3: Apply markup and prepare for ingestion
@@ -94,7 +112,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const errors: string[] = [];
     let failedCount = 0;
 
-    for (const aiProduct of parsedData.products) {
+    const productsToProcess = parsedData.products || [];
+
+    for (const aiProduct of productsToProcess) {
       try {
         // Validate AI-extracted product
         if (!aiProduct.name || !aiProduct.variants?.length) {
@@ -141,7 +161,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           images: aiProduct.image_url
             ? [aiProduct.image_url]
             : [],
-          [typeField]: typeValue,
+          ...(typeField ? { [typeField]: typeValue } : {}),
           price: processedVariants[0]?.price || 0,
           priceMin:
             Math.min(...processedVariants.map((v: any) => v.price)) || 0,
@@ -175,7 +195,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     // Step 4: Return summary
     const response: ImportResponse = {
-      success: failedCount === 0,
+      success: failedCount === 0 && importedProducts.length > 0,
       message:
         failedCount === 0
           ? `Successfully imported ${importedProducts.length} products`
@@ -203,4 +223,4 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       { status: 500 }
     );
   }
-}
+      }

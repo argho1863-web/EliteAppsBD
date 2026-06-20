@@ -23,6 +23,18 @@ export interface Variant {
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 /**
+ * Clean Markdown backticks from AI response if present
+ */
+function cleanJSONResponse(text: string): string {
+  let cleaned = text.trim();
+  // Remove markdown code block wrappers if the AI included them
+  if (cleaned.startsWith('```')) {
+    cleaned = cleaned.replace(/^```json\s*/i, '').replace(/```$/, '').trim();
+  }
+  return cleaned;
+}
+
+/**
  * Calls OpenRouter API with a strict structured prompt
  * Returns JSON-parsed products
  */
@@ -58,7 +70,7 @@ RESPONSE FORMAT (MUST be valid JSON):
       "name": "Product Name",
       "category": "topup",
       "description": "Brief description",
-      "image_url": "https://example.com/image.jpg",
+      "image_url": "[https://example.com/image.jpg](https://example.com/image.jpg)",
       "variants": [
         {
           "title": "100 Units",
@@ -91,16 +103,17 @@ Return ONLY valid JSON. No markdown, no explanations.`;
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
-        'HTTP-Referer': 'https://eliteappsbd.qzz.io',
+        'HTTP-Referer': '[https://eliteappsbd.qzz.io](https://eliteappsbd.qzz.io)',
         'X-Title': 'EliteAppsBD AI Importer',
       },
       body: JSON.stringify({
         model,
+        response_format: { type: 'json_object' }, // FIX: Forces the LLM to output pure JSON text
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt },
         ],
-        temperature: 0.3, // Low temperature for consistency
+        temperature: 0.1, // Lowered temperature slightly from 0.3 to 0.1 for maximum structural adherence
         max_tokens: 4000,
       }),
     });
@@ -117,14 +130,18 @@ Return ONLY valid JSON. No markdown, no explanations.`;
       throw new Error('No response from OpenRouter');
     }
 
-    // Parse the JSON response
-    const parsed = JSON.parse(content) as OpenRouterResponse;
+    // FIX: Clean markdown code blocks/backticks out of response before parsing
+    const cleanedContent = cleanJSONResponse(content);
 
-    if (!Array.isArray(parsed.products)) {
+    // Parse the JSON response
+    const parsed = JSON.parse(cleanedContent) as OpenRouterResponse;
+
+    if (!parsed || !Array.isArray(parsed.products)) {
       throw new Error('Invalid response format: missing products array');
     }
 
     return parsed;
+  
   } catch (error: any) {
     throw new Error(
       `OpenRouter parsing failed: ${error.message || 'Unknown error'}`

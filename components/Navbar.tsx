@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useSession, signOut } from 'next-auth/react';
 import { useCart } from '@/components/CartContext';
-import { ShoppingCart, Menu, X, Zap, User, LogOut, Settings, ChevronDown, Package } from 'lucide-react';
+import { ShoppingCart, Menu, X, Home, User, LogOut, Settings, ChevronDown, Package } from 'lucide-react';
 
 export default function Navbar() {
   const { data: session } = useSession();
@@ -25,39 +25,37 @@ export default function Navbar() {
     <>
       {/* Mobile Backdrop */}
       {mobileOpen && (
-        <div className="fixed inset-0 bg-brand-navy/60 backdrop-blur-sm z-40 md:hidden animate-fade-in" onClick={() => setMobileOpen(false)} />
+        <div className="fixed inset-0 bg-brand-navy/70 z-40 md:hidden animate-fade-in" onClick={() => setMobileOpen(false)} />
       )}
 
-      <div className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'glass border-b border-white/5 shadow-lg shadow-black/30' : 'bg-transparent'}`}>
+      <div className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${scrolled ? 'glass border-b border-white/5' : 'bg-transparent'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 md:h-20 transition-all duration-300">
+          <div className="flex items-center justify-between h-16 md:h-20">
             <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg bg-gold-gradient flex items-center justify-center shadow-gold group-hover:scale-110 transition-transform">
-                <Zap size={16} className="text-brand-navy font-bold" />
+              <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg btn-gold flex items-center justify-center text-sm md:text-base">
+                E
               </div>
-              <span className="font-display font-bold text-lg md:text-xl tracking-tight">
-                <span className="text-gold-gradient">EliteApps</span>
-                <span className="text-white/70 ml-1 text-sm font-normal">BD</span>
+              <span className="font-semibold text-lg md:text-xl tracking-tight">
+                EliteApps
+                <span className="text-white/55 ml-1 text-sm font-normal">BD</span>
               </span>
             </Link>
 
             {/* Desktop Nav */}
             <div className="hidden md:flex items-center gap-8">
-              <Link href="/" className="text-sm font-medium text-white/70 hover:text-white transition-colors relative group/link">
+              <Link href="/" className="text-sm font-medium text-white/70 hover:text-white transition-colors">
                 Home
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand-gold transition-all duration-300 group-hover/link:w-full" />
               </Link>
-              <Link href="/products" className="text-sm font-medium text-white/70 hover:text-white transition-colors relative group/link">
+              <Link href="/products" className="text-sm font-medium text-white/70 hover:text-white transition-colors">
                 Products
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand-gold transition-all duration-300 group-hover/link:w-full" />
               </Link>
             </div>
 
             <div className="flex items-center gap-2 md:gap-4">
               <Link href="/cart" className="relative group text-white/70 hover:text-white transition-colors p-2">
-                <ShoppingCart size={20} className="group-hover:scale-110 transition-transform" />
+                <ShoppingCart size={20} />
                 {totalItems > 0 && (
-                  <span className="absolute top-0 right-0 w-4.5 h-4.5 rounded-full bg-brand-gold text-brand-navy text-[10px] font-bold flex items-center justify-center border-2 border-brand-navy">
+                  <span className="absolute top-0 right-0 w-[18px] h-[18px] rounded-full bg-brand-gold text-brand-navy text-[10px] font-semibold tabular flex items-center justify-center border-2 border-brand-navy">
                     {totalItems > 9 ? '9+' : totalItems}
                   </span>
                 )}
@@ -66,11 +64,11 @@ export default function Navbar() {
               {session ? (
                 <div className="relative">
                   <button onClick={() => setUserMenuOpen(!userMenuOpen)}
-                    className="flex items-center gap-2 glass rounded-full px-1.5 py-1.5 sm:px-3 hover:border-brand-gold/30 border border-white/10 transition-all">
+                    className="flex items-center gap-2 glass rounded-full px-1.5 py-1.5 sm:px-3 hover:border-white/20 border border-white/10 transition-colors">
                     {session.user?.image ? (
-                      <Image src={session.user.image} alt="avatar" width={28} height={28} className="rounded-full shadow-lg shadow-black/20" />
+                      <Image src={session.user.image} alt="avatar" width={28} height={28} className="rounded-full" />
                     ) : (
-                      <div className="w-7 h-7 rounded-full bg-gold-gradient flex items-center justify-center text-xs font-bold text-brand-navy">
+                      <div className="w-7 h-7 rounded-full bg-brand-gold flex items-center justify-center text-xs font-semibold text-brand-navy">
                         {session.user?.name?.[0]?.toUpperCase()}
                       </div>
                     )}
@@ -83,14 +81,13 @@ export default function Navbar() {
                       <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
                       <div className="absolute right-0 top-full mt-3 w-56 glass rounded-2xl border border-white/10 shadow-2xl shadow-black/50 overflow-hidden z-50 animate-fade-up">
                         <div className="px-5 py-4 border-b border-white/5 bg-white/5">
-                          <p className="text-[10px] text-brand-gold uppercase tracking-widest font-bold mb-1">Account</p>
                           <p className="text-sm text-white font-medium truncate">{session.user?.name}</p>
-                          <p className="text-xs text-white/40 truncate">{session.user?.email}</p>
+                          <p className="text-xs text-white/55 truncate">{session.user?.email}</p>
                         </div>
                         {isAdmin && (
                           <Link href="/admin" onClick={() => setUserMenuOpen(false)}
-                            className="flex items-center gap-3 px-5 py-3 text-sm text-brand-gold hover:bg-white/5 transition-colors group">
-                            <Settings size={16} className="group-hover:rotate-45 transition-transform" /> Admin Panel
+                            className="flex items-center gap-3 px-5 py-3 text-sm text-white hover:bg-white/5 transition-colors">
+                            <Settings size={16} /> Admin Panel
                           </Link>
                         )}
                         <button onClick={() => { signOut({ callbackUrl: '/' }); setUserMenuOpen(false); }}
@@ -120,13 +117,13 @@ export default function Navbar() {
           <div className="md:hidden fixed top-16 left-0 right-0 glass border-t border-white/5 animate-fade-in shadow-2xl z-50 overflow-hidden">
             <div className="p-4 space-y-2 bg-brand-navy/95">
               {[
-                { href: '/', label: 'Home', icon: <Zap size={16} /> },
+                { href: '/', label: 'Home', icon: <Home size={16} /> },
                 { href: '/products', label: 'Products', icon: <Package size={16} /> },
                 { href: '/cart', label: 'My Cart', icon: <ShoppingCart size={16} /> }
               ].map(item => (
                 <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-4 px-5 py-4 text-base font-medium text-white/80 hover:text-brand-gold hover:bg-white/5 rounded-xl transition-all">
-                  <span className="text-brand-gold/50">{item.icon}</span>
+                  className="flex items-center gap-4 px-5 py-4 text-base font-medium text-white/80 hover:text-white hover:bg-white/5 rounded-xl transition-colors">
+                  <span className="text-white/55">{item.icon}</span>
                   {item.label}
                 </Link>
               ))}
@@ -134,7 +131,7 @@ export default function Navbar() {
               {isAdmin && (
                 <div className="pt-4 mt-4 border-t border-white/5">
                   <Link href="/admin" onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-4 px-5 py-4 text-base font-bold text-brand-gold hover:bg-brand-gold/10 rounded-xl transition-all">
+                    className="flex items-center gap-4 px-5 py-4 text-base font-medium text-white hover:bg-white/5 rounded-xl transition-colors">
                     <Settings size={16} /> Admin Panel
                   </Link>
                 </div>

@@ -8,6 +8,8 @@ import {
   AlertCircle,
   ArrowRight,
   Zap,
+  Target,
+  BarChart3,
 } from 'lucide-react';
 
 interface ImportResult {
@@ -76,7 +78,7 @@ export default function AIProductImporter() {
 
       if (response.ok && data.success) {
         toast.success(
-          `✅ ${data.imported} products imported successfully!`,
+          `${data.imported} products imported`,
           { id: toastId }
         );
         setResult(data);
@@ -96,14 +98,14 @@ export default function AIProductImporter() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 md:p-8">
+    <div className="min-h-screen bg-[#eef0f5] p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl mb-4 shadow-lg">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-brand-navy rounded-2xl mb-4">
             <Zap className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-2">
             AI Product Importer
           </h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
@@ -113,7 +115,7 @@ export default function AIProductImporter() {
         </div>
 
         {/* Main Card */}
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+        <div className="bg-white rounded-2xl overflow-hidden mb-8">
           <div className="grid md:grid-cols-2 gap-0">
             {/* Form Section */}
             <div className="p-8 md:border-r border-gray-200">
@@ -133,7 +135,7 @@ export default function AIProductImporter() {
                     onChange={(e) => setUrl(e.target.value)}
                     placeholder="https://competitor-site.com"
                     disabled={loading}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-gray-900 placeholder-gray-400 disabled:bg-gray-100 disabled:border-gray-200 disabled:cursor-not-allowed"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition text-gray-900 placeholder-gray-400 disabled:bg-gray-100 disabled:border-gray-200 disabled:cursor-not-allowed"
                   />
                   <p className="text-xs text-gray-500 mt-1">
                     Enter the full URL including https:// or http://
@@ -155,7 +157,7 @@ export default function AIProductImporter() {
                       max="500"
                       step="0.5"
                       disabled={loading}
-                      className="w-full px-4 py-3 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-gray-900 placeholder-gray-400 disabled:bg-gray-100 disabled:border-gray-200 disabled:cursor-not-allowed"
+                      className="w-full px-4 py-3 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition text-gray-900 placeholder-gray-400 disabled:bg-gray-100 disabled:border-gray-200 disabled:cursor-not-allowed"
                     />
                     <span className="absolute right-4 top-3 text-gray-500 font-medium pointer-events-none">
                       %
@@ -168,14 +170,14 @@ export default function AIProductImporter() {
                 </div>
 
                 {/* Formula Info */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <p className="text-sm text-blue-900 font-medium mb-1">
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <p className="text-sm text-amber-900 font-medium mb-1">
                     Price Calculation Formula
                   </p>
-                  <code className="text-xs text-blue-800 font-mono">
+                  <code className="text-xs text-amber-800 font-mono">
                     NewPrice = BasePrice × (1 + Markup% / 100)
                   </code>
-                  <p className="text-xs text-blue-700 mt-2">
+                  <p className="text-xs text-amber-700 mt-2">
                     Example: $100 + 5% markup = ${(100 * 1.05).toFixed(2)}
                   </p>
                 </div>
@@ -184,7 +186,7 @@ export default function AIProductImporter() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-3 px-4 rounded-lg transition flex items-center justify-center gap-2 shadow-lg"
+                  className="w-full btn-gold disabled:opacity-50 font-semibold py-3 px-4 rounded-lg transition flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <>
@@ -202,14 +204,14 @@ export default function AIProductImporter() {
             </div>
 
             {/* Info Section */}
-            <div className="p-8 bg-gradient-to-br from-indigo-50 to-purple-50 flex flex-col justify-between">
+            <div className="p-8 bg-gray-50 flex flex-col justify-between">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   How It Works
                 </h3>
                 <ul className="space-y-3">
                   <li className="flex gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-bold">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-amber-600 text-white flex items-center justify-center text-sm font-medium">
                       1
                     </span>
                     <div>
@@ -220,7 +222,7 @@ export default function AIProductImporter() {
                     </div>
                   </li>
                   <li className="flex gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-bold">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-amber-600 text-white flex items-center justify-center text-sm font-medium">
                       2
                     </span>
                     <div>
@@ -231,7 +233,7 @@ export default function AIProductImporter() {
                     </div>
                   </li>
                   <li className="flex gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-600 text-white flex items-center justify-center text-sm font-bold">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-amber-600 text-white flex items-center justify-center text-sm font-medium">
                       3
                     </span>
                     <div>
@@ -242,7 +244,7 @@ export default function AIProductImporter() {
                     </div>
                   </li>
                   <li className="flex gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-pink-600 text-white flex items-center justify-center text-sm font-bold">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-pink-600 text-white flex items-center justify-center text-sm font-medium">
                       4
                     </span>
                     <div>
@@ -268,9 +270,9 @@ export default function AIProductImporter() {
 
         {/* Results Section */}
         {showResults && result && (
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div className="bg-white rounded-2xl overflow-hidden">
             {result.success ? (
-              <div className="p-8 bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500">
+              <div className="p-8 bg-green-50 border-l-4 border-green-500">
                 <div className="flex items-start gap-4">
                   <CheckCircle className="w-8 h-8 text-green-600 flex-shrink-0 mt-0.5" />
                   <div className="flex-1">
@@ -286,13 +288,13 @@ export default function AIProductImporter() {
                     <div className="grid grid-cols-2 gap-4 mt-4 mb-6">
                       <div className="bg-white rounded-lg p-4 border border-green-100">
                         <p className="text-sm text-gray-600">Imported</p>
-                        <p className="text-2xl font-bold text-green-600">
+                        <p className="text-2xl font-semibold text-green-600">
                           {result.imported}
                         </p>
                       </div>
                       <div className="bg-white rounded-lg p-4 border border-gray-200">
                         <p className="text-sm text-gray-600">Failed</p>
-                        <p className="text-2xl font-bold text-gray-600">
+                        <p className="text-2xl font-semibold text-gray-600">
                           {result.failed}
                         </p>
                       </div>
@@ -301,7 +303,7 @@ export default function AIProductImporter() {
                     {/* Product Preview */}
                     {result.products.length > 0 && (
                       <div>
-                        <p className="text-sm font-semibold text-gray-900 mb-3">
+                        <p className="text-sm font-medium text-gray-900 mb-3">
                           Sample Products:
                         </p>
                         <div className="space-y-2 max-h-40 overflow-y-auto">
@@ -331,7 +333,7 @@ export default function AIProductImporter() {
                 </div>
               </div>
             ) : (
-              <div className="p-8 bg-gradient-to-r from-red-50 to-pink-50 border-l-4 border-red-500">
+              <div className="p-8 bg-red-50 border-l-4 border-red-500">
                 <div className="flex items-start gap-4">
                   <AlertCircle className="w-8 h-8 text-red-600 flex-shrink-0 mt-0.5" />
                   <div>
@@ -384,7 +386,7 @@ export default function AIProductImporter() {
         {/* Info Cards */}
         <div className="grid md:grid-cols-3 gap-4 mt-8">
           <div className="bg-white rounded-xl p-6 shadow-md border border-gray-100">
-            <div className="text-3xl font-bold text-blue-600 mb-2">⚡</div>
+            <Zap className="w-7 h-7 text-amber-600 mb-2" />
             <h3 className="font-semibold text-gray-900 mb-1">Fast</h3>
             <p className="text-sm text-gray-600">
               AI processes products in seconds using OpenRouter
@@ -392,7 +394,7 @@ export default function AIProductImporter() {
           </div>
 
           <div className="bg-white rounded-xl p-6 shadow-md border border-gray-100">
-            <div className="text-3xl font-bold text-indigo-600 mb-2">🎯</div>
+            <Target className="w-7 h-7 text-amber-600 mb-2" />
             <h3 className="font-semibold text-gray-900 mb-1">Accurate</h3>
             <p className="text-sm text-gray-600">
               Smart parsing extracts all product details and variants
@@ -400,7 +402,7 @@ export default function AIProductImporter() {
           </div>
 
           <div className="bg-white rounded-xl p-6 shadow-md border border-gray-100">
-            <div className="text-3xl font-bold text-purple-600 mb-2">📊</div>
+            <BarChart3 className="w-7 h-7 text-amber-600 mb-2" />
             <h3 className="font-semibold text-gray-900 mb-1">Flexible</h3>
             <p className="text-sm text-gray-600">
               Customize markup per import for competitive pricing

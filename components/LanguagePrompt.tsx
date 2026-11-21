@@ -106,7 +106,7 @@ export default function LanguagePrompt() {
         <>
           {/* Backdrop */}
           <div
-            className={`fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-4 transition-all duration-350 ${
+            className={`fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-4 transition-colors duration-350 ${
               closing ? 'opacity-0' : 'opacity-100'
             }`}
             style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)' }}
@@ -114,7 +114,7 @@ export default function LanguagePrompt() {
           >
             {/* Modal */}
             <div
-              className={`relative w-full max-w-sm rounded-3xl border border-white/10 p-7 shadow-2xl shadow-black/70 transition-all duration-350 ${
+              className={`relative w-full max-w-sm rounded-2xl border border-white/10 p-7 transition-colors duration-350 ${
                 closing ? 'translate-y-10 opacity-0 scale-95' : 'translate-y-0 opacity-100 scale-100'
               }`}
               style={{ background: 'linear-gradient(135deg, #0f172a 60%, #1e1b4b 100%)' }}
@@ -123,24 +123,24 @@ export default function LanguagePrompt() {
               {/* Close */}
               <button
                 onClick={handleNo}
-                className="absolute top-4 right-4 w-7 h-7 rounded-full bg-white/5 hover:bg-white/15 flex items-center justify-center text-white/30 hover:text-white transition-all"
+                className="absolute top-4 right-4 w-7 h-7 rounded-full bg-white/5 hover:bg-white/15 flex items-center justify-center text-white/55 hover:text-white transition-colors"
               >
                 <X size={13} />
               </button>
 
               {/* Icon */}
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 shadow-lg"
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
                 style={{ background: 'linear-gradient(135deg, rgba(34,197,94,0.2), rgba(16,185,129,0.1))', border: '1px solid rgba(34,197,94,0.25)' }}>
                 <Languages size={26} className="text-emerald-400" />
               </div>
 
               {/* Text */}
-              <h2 className="font-display font-black text-xl text-white mb-1">বাংলায় দেখুন?</h2>
-              <p className="text-sm text-white/50 mb-1">
+              <h2 className="font-display font-semibold text-xl text-white mb-1">বাংলায় দেখুন?</h2>
+              <p className="text-sm text-white/55 mb-1">
                 Do you want to view this website in{' '}
                 <span className="text-white/80 font-semibold">Bangla</span>?
               </p>
-              <p className="text-xs text-white/30 mb-6">
+              <p className="text-xs text-white/55 mb-6">
                 আপনি কি এই ওয়েবসাইটটি বাংলায় দেখতে চান?
               </p>
 
@@ -148,7 +148,7 @@ export default function LanguagePrompt() {
               <div className="flex flex-col gap-3">
                 <button
                   onClick={handleYes}
-                  className="w-full py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-emerald-500/20"
+                  className="w-full py-3.5 rounded-xl font-medium text-sm flex items-center justify-center gap-2 transition-colors"
                   style={{ background: 'linear-gradient(135deg, #22c55e, #10b981)', color: 'white' }}
                 >
                   <Languages size={16} />
@@ -156,13 +156,13 @@ export default function LanguagePrompt() {
                 </button>
                 <button
                   onClick={handleNo}
-                  className="w-full py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white/50 hover:text-white/80 font-semibold text-sm transition-all"
+                  className="w-full py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white/55 hover:text-white/80 font-medium text-sm transition-colors"
                 >
                   No, keep in English
                 </button>
               </div>
 
-              <p className="text-[10px] text-white/15 text-center mt-4 uppercase tracking-widest">
+              <p className="text-xs text-white/55 text-center mt-4">
                 Powered by Google Translate
               </p>
             </div>

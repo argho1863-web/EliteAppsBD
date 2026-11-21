@@ -5,20 +5,22 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          gold: '#F0A500', 'gold-light': '#FFD166', 'gold-dark': '#C47D00',
-          navy: '#0A0A14', 'navy-2': '#12121E', 'navy-3': '#1A1A2E', 'navy-4': '#16213E',
-          electric: '#4361EE', accent: '#E94560',
+          // Gold stays the one flat accent. The navy ramp is the "ink" neutral ramp.
+          gold: '#F0A500', 'gold-light': '#F7B21F', 'gold-dark': '#9A6700',
+          navy: '#0B0D14', 'navy-2': '#07080D', 'navy-3': '#11141C', 'navy-4': '#1A1E28',
+          electric: '#4361EE', accent: '#E5484D',
         },
       },
       fontFamily: {
-        display: ['var(--font-display)', 'serif'],
-        body: ['var(--font-body)', 'sans-serif'],
-        mono: ['var(--font-mono)', 'monospace'],
+        display: ['var(--font-display)', 'system-ui', 'sans-serif'],
+        body: ['var(--font-body)', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-mono)', 'ui-monospace', 'monospace'],
       },
+      // Depth comes from layered neutral shadows, never from colored glow.
       boxShadow: {
-        'gold': '0 0 30px rgba(240,165,0,0.3)',
-        'gold-strong': '0 0 50px rgba(240,165,0,0.5)',
-        'card': '0 8px 32px rgba(0,0,0,0.4)',
+        'gold': '0 8px 16px -4px rgba(0,0,0,0.5)',
+        'gold-strong': '0 12px 24px -6px rgba(0,0,0,0.55)',
+        'card': '0 1px 1px rgba(0,0,0,0.4), 0 8px 16px -4px rgba(0,0,0,0.35), 0 24px 48px -16px rgba(0,0,0,0.4)',
       },
     },
   },

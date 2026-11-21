@@ -36,40 +36,40 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="min-h-screen flex bg-brand-navy">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
-        <div className="fixed inset-0 bg-brand-navy/80 backdrop-blur-sm z-40 lg:hidden animate-fade-in" onClick={() => setSidebarOpen(false)} />
+        <div className="fixed inset-0 bg-brand-navy/80 z-40 lg:hidden animate-fade-in" onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* Sidebar */}
       <aside className={`w-64 bg-brand-navy-2 border-r border-white/5 flex flex-col fixed left-0 top-0 bottom-0 z-50 transition-transform duration-300 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <div className="p-6 border-b border-white/5 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gold-gradient flex items-center justify-center shadow-gold group-hover:rotate-12 transition-transform">
-              <Zap size={20} className="text-brand-navy font-bold" />
+            <div className="w-10 h-10 rounded-xl bg-gold-gradient flex items-center justify-center shadow-gold transition-transform">
+              <Zap size={20} className="text-brand-navy font-semibold" />
             </div>
             <div>
-              <span className="font-display font-black text-lg text-gold-gradient block leading-none">EliteApps</span>
-              <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Admin Panel</span>
+              <span className="font-display font-semibold text-lg text-gold-gradient block leading-none">EliteApps</span>
+              <span className="text-xs font-medium text-white/55">Admin Panel</span>
             </div>
           </Link>
-          <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-white/40 hover:text-white"><ArrowLeft size={20} /></button>
+          <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-white/55 hover:text-white"><ArrowLeft size={20} /></button>
         </div>
         
         <nav className="flex-1 px-4 py-8 space-y-2 overflow-y-auto custom-scrollbar">
-          <p className="text-[10px] text-white/20 uppercase tracking-[0.2em] font-bold mb-4 px-3">Main Menu</p>
+          <p className="text-xs text-white/55 font-medium mb-4 px-3">Main Menu</p>
           {navItems.map(item => (
-            <Link key={item.href} href={item.href} className={`admin-nav-item py-3.5 px-5 rounded-xl flex items-center gap-4 transition-all ${pathname === item.href ? 'bg-brand-gold/10 text-brand-gold shadow-lg shadow-brand-gold/5 border border-brand-gold/10' : 'text-white/50 hover:bg-white/5 hover:text-white'}`}>
-              <span className={pathname === item.href ? 'text-brand-gold' : 'text-white/20 group-hover:text-white/40'}>{item.icon}</span>
-              <span className="font-bold text-sm tracking-wide">{item.label}</span>
+            <Link key={item.href} href={item.href} className={`admin-nav-item py-3.5 px-5 rounded-xl flex items-center gap-4 transition-colors ${pathname === item.href ? 'bg-brand-navy-4 text-white border border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]' : 'text-white/55 hover:bg-white/5 hover:text-white'}`}>
+              <span className={pathname === item.href ? 'text-brand-gold' : 'text-white/55 group-hover:text-white'}>{item.icon}</span>
+              <span className="font-medium text-sm">{item.label}</span>
             </Link>
           ))}
         </nav>
 
         <div className="p-4 border-t border-white/5 space-y-2">
-          <Link href="/" className="admin-nav-item py-3 px-5 text-xs font-bold uppercase tracking-widest text-white/40 hover:text-brand-gold flex items-center gap-3">
+          <Link href="/" className="admin-nav-item py-3 px-5 text-xs font-medium text-white/55 hover:text-brand-gold flex items-center gap-3">
             <ArrowLeft size={14} /> Back to Store
           </Link>
           <button onClick={() => signOut({ callbackUrl: '/' })} 
-            className="w-full admin-nav-item py-3 px-5 text-xs font-bold uppercase tracking-widest text-red-400 hover:bg-red-400/10 flex items-center gap-3">
+            className="w-full admin-nav-item py-3 px-5 text-xs font-medium text-red-400 hover:bg-red-400/10 flex items-center gap-3">
             <LogOut size={14} /> Sign Out
           </button>
         </div>
@@ -78,12 +78,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Main Content */}
       <div className="flex-1 flex flex-col lg:ml-64 min-h-screen">
         {/* Mobile Header */}
-        <header className="lg:hidden h-16 border-b border-white/5 flex items-center justify-between px-6 sticky top-0 bg-brand-navy/80 backdrop-blur-md z-30">
+        <header className="lg:hidden h-16 border-b border-white/5 flex items-center justify-between px-6 sticky top-0 bg-brand-navy/80 z-30">
           <button onClick={() => setSidebarOpen(true)} className="text-white/70 hover:text-white">
             <LayoutDashboard size={24} />
           </button>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gold-gradient flex items-center justify-center font-black text-brand-navy text-xs">
+            <div className="w-8 h-8 rounded-lg bg-gold-gradient flex items-center justify-center font-medium text-brand-navy text-xs">
               {session?.user?.name?.[0]}
             </div>
           </div>

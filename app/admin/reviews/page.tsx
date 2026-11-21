@@ -74,8 +74,7 @@ export default function AdminReviewsPage() {
     <div className="p-6 md:p-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <p className="text-xs text-brand-gold uppercase tracking-widest font-semibold mb-1">Manage</p>
-          <h1 className="font-display font-black text-2xl md:text-3xl flex items-center gap-3">
+          <h1 className="font-display font-semibold text-2xl md:text-3xl flex items-center gap-3">
             <Star size={28} className="text-brand-gold" /> Customer Reviews
           </h1>
         </div>
@@ -86,17 +85,17 @@ export default function AdminReviewsPage() {
           <div className="w-12 h-12 border-4 border-brand-gold border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
-        <div className="glass rounded-[2rem] border border-white/5 overflow-hidden shadow-2xl shadow-black/20">
+        <div className="glass rounded-2xl border border-white/5 overflow-hidden">
           <div className="px-8 py-5 border-b border-white/5 flex items-center justify-between">
-            <span className="text-sm font-bold text-white/40 uppercase tracking-widest">
+            <span className="text-sm font-medium text-white/55">
               {reviews.length} Total Reviews
             </span>
           </div>
           
           {reviews.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-24 gap-4 text-white/20">
+            <div className="flex flex-col items-center justify-center py-24 gap-4 text-white/55">
               <MessageSquare size={48} className="opacity-20" />
-              <p className="text-sm font-bold uppercase tracking-widest">No reviews submitted yet</p>
+              <p className="text-sm font-medium">No reviews submitted yet</p>
             </div>
           ) : (
             <div className="overflow-x-auto custom-scrollbar">
@@ -104,7 +103,7 @@ export default function AdminReviewsPage() {
                 <thead>
                   <tr className="bg-white/2 border-b border-white/5">
                     {['Date', 'Customer', 'Rating', 'Status', 'Actions'].map(h => (
-                      <th key={h} className="px-6 py-5 text-[10px] text-white/30 font-black uppercase tracking-[0.2em]">{h}</th>
+                      <th key={h} className="px-6 py-5 text-xs text-white/55 font-medium">{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -112,23 +111,23 @@ export default function AdminReviewsPage() {
                   {reviews.map(review => (
                     <tr key={review._id} className={`hover:bg-white/2 transition-colors group ${!review.isApproved ? 'bg-black/20' : ''}`}>
                       <td className="px-6 py-4">
-                        <p className="text-xs font-bold text-white/60">
+                        <p className="text-xs font-medium text-white/70">
                           {new Date(review.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </p>
                       </td>
                       <td className="px-6 py-4">
-                        <p className="text-sm font-bold text-white/90">{review.userName}</p>
-                        <p className="text-[10px] text-white/40">{review.userEmail}</p>
+                        <p className="text-sm font-medium text-white/90">{review.userName}</p>
+                        <p className="text-xs text-white/55">{review.userEmail}</p>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex gap-0.5">
                           {[1, 2, 3, 4, 5].map(s => (
-                            <Star key={s} size={12} className={s <= review.rating ? 'text-amber-400 fill-amber-400' : 'text-white/20'} />
+                            <Star key={s} size={12} className={s <= review.rating ? 'text-amber-400 fill-amber-400' : 'text-white/55'} />
                           ))}
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl border ${
+                        <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-xl border ${
                           review.isApproved 
                             ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
                             : 'bg-amber-400/10 text-amber-400 border-amber-400/20'
@@ -140,7 +139,7 @@ export default function AdminReviewsPage() {
                         <div className="flex items-center gap-3">
                           <button 
                             onClick={() => handleToggleApproval(review._id, review.isApproved)} 
-                            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all shadow-lg ${
+                            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${
                               review.isApproved 
                                 ? 'bg-amber-400/10 text-amber-400 hover:bg-amber-400 hover:text-white border border-amber-400/20' 
                                 : 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white border border-emerald-500/20'
@@ -152,7 +151,7 @@ export default function AdminReviewsPage() {
                           
                           <button 
                             onClick={() => handleDelete(review._id)} 
-                            className="w-9 h-9 rounded-xl bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 flex items-center justify-center transition-all shadow-lg shadow-red-500/5"
+                            className="w-9 h-9 rounded-xl bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 flex items-center justify-center transition-colors"
                             title="Delete Review"
                           >
                             <Trash2 size={14} />

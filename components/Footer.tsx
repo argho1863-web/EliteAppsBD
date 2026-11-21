@@ -1,62 +1,67 @@
 'use client';
 import Link from 'next/link';
-import { Zap, MessageCircle, Mail, Heart } from 'lucide-react';
+import { MessageCircle, Mail } from 'lucide-react';
+
+const wallets = [
+  { name: 'bKash', color: '#E2136E' },
+  { name: 'Nagad', color: '#F7941D' },
+  { name: 'Rocket', color: '#8B5CF6' },
+  { name: 'Upay', color: '#10B981' },
+];
 
 export default function Footer() {
   return (
     <footer className="border-t border-white/5 bg-brand-navy-2">
-      <div className="max-w-7xl mx-auto px-4 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
           <div className="md:col-span-2">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-gold-gradient flex items-center justify-center"><Zap size={16} className="text-brand-navy" /></div>
-              <span className="font-display font-bold text-lg"><span className="text-gold-gradient">EliteApps</span><span className="text-white/50 ml-1 text-sm font-normal">BD</span></span>
+              <div className="w-8 h-8 rounded-lg btn-gold flex items-center justify-center text-sm">E</div>
+              <span className="font-medium text-lg tracking-tight">EliteApps<span className="text-white/55 ml-1 text-sm font-normal">BD</span></span>
             </Link>
-            <p className="text-sm text-white/40 leading-relaxed max-w-xs mb-5">Bangladesh's premier digital app store. Premium products, secure payments, fast delivery.</p>
-            <div className="flex gap-3">
+            <p className="text-sm text-white/70 leading-relaxed max-w-xs mb-5">Apps, subscriptions and top-ups for Bangladesh. Pay with a mobile wallet and get your order on WhatsApp or email.</p>
+            <div className="flex flex-wrap gap-3">
               <a href="https://wa.me/8801707776676" target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-2 text-xs glass px-3 py-2 rounded-lg border border-white/10 hover:border-green-500/30 text-white/50 hover:text-green-400 transition-all">
-                <MessageCircle size={13} /> WhatsApp Support
+                className="btn-key flex items-center gap-2 text-xs px-3 py-2 rounded-lg text-white/80">
+                <MessageCircle size={13} /> WhatsApp support
               </a>
               <a href="mailto:help@eliteappsbd.qzz.io"
-                className="flex items-center gap-2 text-xs glass px-3 py-2 rounded-lg border border-white/10 hover:border-blue-500/30 text-white/50 hover:text-blue-400 transition-all">
-                <Mail size={13} /> Email Support
+                className="btn-key flex items-center gap-2 text-xs px-3 py-2 rounded-lg text-white/80">
+                <Mail size={13} /> Email support
               </a>
             </div>
           </div>
 
           <div>
-            <h4 className="text-xs font-semibold text-white/30 uppercase tracking-widest mb-4">Store</h4>
+            <h4 className="text-sm font-medium text-white/90 mb-4">Store</h4>
             <ul className="space-y-2.5">
-              {[{ label: 'All Products', href: '/products' }, { label: 'Cart', href: '/cart' }].map(l => (
-                <li key={l.href}><Link href={l.href} className="text-sm text-white/40 hover:text-brand-gold transition-colors">{l.label}</Link></li>
+              {[{ label: 'All products', href: '/products' }, { label: 'Cart', href: '/cart' }].map(l => (
+                <li key={l.href}><Link href={l.href} className="text-sm text-white/70 hover:text-white transition-colors">{l.label}</Link></li>
               ))}
             </ul>
           </div>
 
           <div>
-            <h4 className="text-xs font-semibold text-white/30 uppercase tracking-widest mb-4">Account</h4>
+            <h4 className="text-sm font-medium text-white/90 mb-4">Account</h4>
             <ul className="space-y-2.5">
-              {[{ label: 'Sign In', href: '/auth/signin' }, { label: 'Sign Up', href: '/auth/signup' }].map(l => (
-                <li key={l.href}><Link href={l.href} className="text-sm text-white/40 hover:text-brand-gold transition-colors">{l.label}</Link></li>
+              {[{ label: 'Sign in', href: '/auth/signin' }, { label: 'Sign up', href: '/auth/signup' }].map(l => (
+                <li key={l.href}><Link href={l.href} className="text-sm text-white/70 hover:text-white transition-colors">{l.label}</Link></li>
               ))}
             </ul>
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-3 py-6 border-t border-white/5 mb-6">
-          <span className="text-xs text-white/20">We accept:</span>
-          {[{ name: 'bKash', color: '#E2136E', emoji: '🅱️' }, { name: 'Nagad', color: '#F7941D', emoji: '🆖' }, { name: 'Rocket', color: '#8B5CF6', emoji: '🚀' }, { name: 'Upay', color: '#10B981', emoji: '💸' }].map(p => (
-            <span key={p.name} className="flex items-center gap-1.5 text-xs glass px-3 py-1.5 rounded-lg border border-white/8 font-medium" style={{ color: p.color }}>
-              {p.emoji} {p.name}
+          <span className="text-xs text-white/55">We accept</span>
+          {wallets.map(w => (
+            <span key={w.name} className="glass flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg font-medium text-white/90">
+              <span className="w-2 h-2 rounded-sm" style={{ background: w.color }} aria-hidden />
+              {w.name}
             </span>
           ))}
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-4 border-t border-white/5">
-          <p className="text-xs text-white/25">© {new Date().getFullYear()} EliteApps BD. All rights reserved.</p>
-          <p className="text-xs text-white/20 flex items-center gap-1">Made with <Heart size={10} className="text-brand-accent" /> in Bangladesh</p>
-        </div>
+        <p className="text-xs text-white/55 pt-4 border-t border-white/5">© {new Date().getFullYear()} EliteApps BD. All rights reserved.</p>
       </div>
     </footer>
   );

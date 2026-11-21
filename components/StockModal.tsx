@@ -29,19 +29,15 @@ export default function StockModal({ isOpen, onClose }: StockModalProps) {
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
+        className="absolute inset-0 bg-black/70 animate-fade-in"
         onClick={onClose}
       />
       
       {/* Modal Content */}
-      <div className="relative w-full max-w-md glass border border-white/10 rounded-3xl p-8 shadow-2xl animate-scale-up overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-gold/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-red-500/5 rounded-full blur-3xl" />
-
+      <div className="relative w-full max-w-md glass rounded-2xl p-8 animate-scale-up">
         <button 
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-white/30 hover:text-white transition-colors"
+          className="absolute top-4 right-4 p-2 text-white/55 hover:text-white transition-colors"
         >
           <X size={20} />
         </button>
@@ -51,24 +47,24 @@ export default function StockModal({ isOpen, onClose }: StockModalProps) {
             <ShoppingBag size={40} className="text-red-400" />
           </div>
           
-          <h3 className="font-display font-black text-2xl mb-3 text-white">Out of Stock!</h3>
-          <p className="text-white/50 text-base leading-relaxed mb-10">
-            We're sorry! <strong className="text-white/80">This Product Is Out Of Stock</strong> at the moment. Please check back later or explore our other premium offerings.
+          <h3 className="font-medium text-2xl mb-3 text-white">Out of stock</h3>
+          <p className="text-white/70 text-base leading-relaxed mb-10">
+            <strong className="text-white/90 font-medium">This product is out of stock</strong> right now. Check back later or look at something else in the catalogue.
           </p>
 
           <div className="flex flex-col gap-3">
             <Link 
               href="/products" 
               onClick={onClose}
-              className="btn-gold w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 group"
+              className="btn-gold w-full py-4 rounded-xl flex items-center justify-center gap-2"
             >
               Browse other products
-              <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+              <ArrowRight size={18} />
             </Link>
             
             <button 
               onClick={onClose}
-              className="text-sm text-white/30 hover:text-white transition-colors py-2"
+              className="text-sm text-white/55 hover:text-white transition-colors py-2"
             >
               Close
             </button>

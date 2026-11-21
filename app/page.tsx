@@ -16,10 +16,23 @@ const features = [
   { icon: Star, title: 'Hand-picked catalogue', desc: 'Every product is reviewed before it is listed.' },
 ];
 
+/** Holds the height of a product grid while the catalogue loads, so nothing below jumps. */
+function GridSkeleton() {
+  return (
+    <section className="section-padding max-w-7xl mx-auto w-full" aria-hidden>
+      <div className="skeleton h-9 w-40 mb-10" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {[0, 1, 2, 3].map(i => <div key={i} className="skeleton h-[22rem]" />)}
+      </div>
+    </section>
+  );
+}
+
 export default function HomePage() {
   const [featured, setFeatured] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [latest, setLatest] = useState<any[]>([]);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -30,7 +43,7 @@ export default function HomePage() {
       setFeatured(Array.isArray(f) ? f : []);
       setCategories(Array.isArray(c) ? c : []);
       setLatest(Array.isArray(l) ? l : []);
-    }).catch(() => {});
+    }).catch(() => {}).finally(() => setLoaded(true));
   }, []);
 
   return (
@@ -39,8 +52,13 @@ export default function HomePage() {
 
       {/* Hero */}
       <section className="relative overflow-hidden pt-28 md:pt-32 pb-10 lg:pb-0 lg:min-h-[100svh] flex items-center">
+        {/* decorative ruled grid on its own slow layer; text never moves with the scroll */}
+        <Parallax speed={0.06} className="absolute inset-0 pointer-events-none" >
+          <div className="hero-grid" aria-hidden />
+        </Parallax>
+
         <div className="max-w-7xl mx-auto w-full px-6 sm:px-12 lg:px-20 grid lg:grid-cols-[1.05fr_1fr] gap-4 lg:gap-8 items-center">
-          <Parallax speed={0.1} className="relative z-10">
+          <div className="relative z-10">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-medium leading-[1.05] tracking-[-0.03em] mb-6 animate-fade-up">
               Apps, subscriptions and top-ups, delivered within 48 hours
             </h1>
@@ -56,18 +74,20 @@ export default function HomePage() {
                 <MessageCircle size={16} className="text-white/70" /> WhatsApp support
               </a>
             </div>
-          </Parallax>
+          </div>
 
           <Hero3D className="h-[340px] sm:h-[440px] lg:h-[620px] w-full" />
         </div>
       </section>
+
+      {!loaded && <GridSkeleton />}
 
       {/* Categories */}
       {categories.length > 0 && (
         <Reveal className="section-padding max-w-7xl mx-auto w-full">
           <div className="flex items-end justify-between mb-10">
             <h2 className="text-responsive-h2">Categories</h2>
-            <Link href="/products" className="text-sm text-white/70 hover:text-white flex items-center gap-1 mb-1 transition-colors">View all <ArrowRight size={14} /></Link>
+            <Link href="/products" className="text-sm text-white/70 hover:text-white flex items-center gap-1 mb-1 py-2 transition-colors">View all <ArrowRight size={14} /></Link>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {categories.map((cat: any) => (
@@ -88,7 +108,7 @@ export default function HomePage() {
         <Reveal className="section-padding max-w-7xl mx-auto w-full">
           <div className="flex items-end justify-between mb-10">
             <h2 className="text-responsive-h2">Featured</h2>
-            <Link href="/products?featured=true" className="text-sm text-white/70 hover:text-white flex items-center gap-1 mb-1 transition-colors">See all <ArrowRight size={14} /></Link>
+            <Link href="/products?featured=true" className="text-sm text-white/70 hover:text-white flex items-center gap-1 mb-1 py-2 transition-colors">See all <ArrowRight size={14} /></Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {featured.map((p: any, i: number) => <ProductCard key={p._id?.$oid || p._id} product={{ ...p, _id: p._id?.$oid || p._id }} index={i} />)}
@@ -101,7 +121,7 @@ export default function HomePage() {
         <Reveal className="section-padding max-w-7xl mx-auto w-full">
           <div className="flex items-end justify-between mb-10">
             <h2 className="text-responsive-h2">Latest</h2>
-            <Link href="/products" className="text-sm text-white/70 hover:text-white flex items-center gap-1 mb-1 transition-colors">All products <ArrowRight size={14} /></Link>
+            <Link href="/products" className="text-sm text-white/70 hover:text-white flex items-center gap-1 mb-1 py-2 transition-colors">All products <ArrowRight size={14} /></Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {latest.map((p: any, i: number) => <ProductCard key={p._id?.$oid || p._id} product={{ ...p, _id: p._id?.$oid || p._id }} index={i} />)}

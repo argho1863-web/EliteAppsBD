@@ -92,13 +92,13 @@ export default function DetailsPage() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <div className="pt-24 pb-20 px-4 max-w-2xl mx-auto w-full flex-1">
-        <Link href="/cart" className="inline-flex items-center gap-2 text-sm text-white/40 hover:text-white mb-8 transition-colors">
+        <Link href="/cart" className="inline-flex items-center gap-2 text-sm text-white/55 hover:text-white mb-8 transition-colors">
           <ArrowLeft size={14} /> Back to Cart
         </Link>
         <div className="mb-8">
-          <p className="text-xs text-brand-gold uppercase tracking-widest font-semibold mb-2">Step 1 of 2</p>
-          <h1 className="font-display font-black text-4xl">Your Details</h1>
-          <p className="text-sm text-white/40 mt-2">We need a few details to complete your order.</p>
+          <p className="text-xs text-white/55 font-medium mb-2">Step 1 of 2</p>
+          <h1 className="font-display font-semibold text-4xl">Your Details</h1>
+          <p className="text-sm text-white/55 mt-2">We need a few details to complete your order.</p>
         </div>
 
         <div className="glass rounded-2xl p-8 border border-white/8">
@@ -107,15 +107,15 @@ export default function DetailsPage() {
               <ClipboardList size={20} className="text-brand-gold" />
             </div>
             <div>
-              <h2 className="font-bold text-base">Order Information</h2>
-              <p className="text-xs text-white/40">Please fill in all required fields</p>
+              <h2 className="font-semibold text-base">Order Information</h2>
+              <p className="text-xs text-white/55">Please fill in all required fields</p>
             </div>
           </div>
 
           <div className="space-y-5">
             {allFields.map((field, i) => (
               <div key={i}>
-                <label className="block text-xs text-white/50 mb-1.5 font-medium uppercase tracking-wider">
+                <label className="block text-xs text-white/55 mb-1.5 font-medium">
                   {field.label} {field.required && <span className="text-red-400">*</span>}
                 </label>
                 <input
@@ -132,15 +132,15 @@ export default function DetailsPage() {
           <button
             type="button"
             onClick={handleSubmit}
-            className="btn-gold w-full py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 mt-8 text-sm"
+            className="btn-gold w-full py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 mt-8 text-sm"
           >
             Continue to Payment <ArrowRight size={16} />
           </button>
         </div>
 
         {session?.user && (
-          <p className="text-center text-xs text-white/30 mt-4">
-            Ordering as <span className="text-white/50 font-medium">{session.user.email}</span>
+          <p className="text-center text-xs text-white/55 mt-4">
+            Ordering as <span className="text-white/55 font-medium">{session.user.email}</span>
           </p>
         )}
       </div>

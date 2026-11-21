@@ -47,15 +47,14 @@ function ProductsContent() {
       <Navbar />
       <div className="pt-24 pb-20 px-4 max-w-7xl mx-auto w-full flex-1">
         <div className="mb-10">
-          <p className="text-xs text-brand-gold uppercase tracking-widest font-semibold mb-2">Explore</p>
-          <h1 className="font-display font-black text-4xl sm:text-5xl">All Products</h1>
+          <h1 className="font-display font-semibold text-4xl sm:text-5xl">All Products</h1>
         </div>
 
         <div className="flex flex-col md:flex-row gap-4 mb-10">
           <div className="relative flex-1">
-            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30" />
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/55" />
             <input type="text" placeholder="Search products..." value={search} onChange={e => setSearch(e.target.value)} className="input-dark pl-10 h-12" />
-            {search && <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60"><X size={14} /></button>}
+            {search && <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/55 hover:text-white"><X size={14} /></button>}
           </div>
           <div className="flex items-center gap-3 glass rounded-xl px-4 py-2 border border-white/5">
             <SlidersHorizontal size={14} className="text-brand-gold/60" />
@@ -69,19 +68,19 @@ function ProductsContent() {
         </div>
 
         <div className="flex gap-2.5 flex-wrap mb-10">
-          <button onClick={() => setActiveCategory('all')} className={`px-5 py-2 rounded-xl text-sm font-bold tracking-wide transition-all ${activeCategory === 'all' ? 'bg-brand-gold text-brand-navy shadow-gold' : 'glass border border-white/10 text-white/60 hover:text-white'}`}>All</button>
+          <button onClick={() => setActiveCategory('all')} className={`px-5 py-2 rounded-xl text-sm font-semibold transition-colors ${activeCategory === 'all' ? 'bg-brand-gold text-brand-navy shadow-gold' : 'glass border border-white/10 text-white/70 hover:text-white'}`}>All</button>
           {categories.map((cat: any) => {
             const catId = cat._id?.$oid || cat._id;
             return (
               <button key={catId} onClick={() => setActiveCategory(cat.slug)}
-                className={`px-5 py-2 rounded-xl text-sm font-bold tracking-wide transition-all whitespace-nowrap ${activeCategory === cat.slug ? 'bg-brand-gold text-brand-navy shadow-gold' : 'glass border border-white/10 text-white/60 hover:text-white'}`}>
+                className={`px-5 py-2 rounded-xl text-sm font-semibold transition-colors whitespace-nowrap ${activeCategory === cat.slug ? 'bg-brand-gold text-brand-navy shadow-gold' : 'glass border border-white/10 text-white/70 hover:text-white'}`}>
                 {cat.icon} <span className="ml-1.5">{cat.name}</span>
               </button>
             );
           })}
         </div>
 
-        <p className="text-sm text-white/30 mb-6">{loading ? 'Loading products...' : `${products.length} product${products.length !== 1 ? 's' : ''} found`}</p>
+        <p className="text-sm text-white/55 mb-6">{loading ? 'Loading products...' : `${products.length} product${products.length !== 1 ? 's' : ''} found`}</p>
 
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -94,9 +93,9 @@ function ProductsContent() {
           </div>
         ) : products.length === 0 ? (
           <div className="text-center py-24 flex flex-col items-center gap-4">
-            <PackageX size={48} className="text-white/20" />
-            <h3 className="font-display font-bold text-xl text-white/40">No products found</h3>
-            <p className="text-sm text-white/25">{search ? 'Try a different search term' : 'No products available yet. Check back soon!'}</p>
+            <PackageX size={48} className="text-white/55" />
+            <h3 className="font-display font-semibold text-xl text-white/55">No products found</h3>
+            <p className="text-sm text-white/55">{search ? 'Try a different search term' : 'No products available yet. Check back soon!'}</p>
             {search && <button onClick={() => setSearch('')} className="btn-gold px-6 py-2 rounded-xl text-sm font-semibold mt-2">Clear Search</button>}
           </div>
         ) : (

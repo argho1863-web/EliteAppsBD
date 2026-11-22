@@ -11,20 +11,24 @@ import toast from 'react-hot-toast';
 import { ShoppingCart, Zap, ArrowLeft, Star, Shield, Truck, Check, Send } from 'lucide-react';
 import StockModal from '@/components/StockModal';
 import Tilt from '@/components/Tilt';
+import { stagger } from '@/components/motion';
 
 export const runtime = 'edge';
 
 function StarPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   const [hovered, setHovered] = useState(0);
   return (
-    <div className="flex gap-1">
+    <div className="flex" role="radiogroup" aria-label="Your rating">
       {[1, 2, 3, 4, 5].map(s => (
         <button
           key={s} type="button"
+          role="radio"
+          aria-checked={value === s}
+          aria-label={`${s} ${s === 1 ? 'star' : 'stars'}`}
           onMouseEnter={() => setHovered(s)}
           onMouseLeave={() => setHovered(0)}
           onClick={() => onChange(s)}
-          className="focus:outline-none"
+          className="w-11 h-11 flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold rounded-lg active:scale-90 transition-transform duration-150"
         >
           <Star
             size={24}
@@ -88,13 +92,13 @@ export default function ProductDetailPage() {
     if (!session) { router.push(`/auth/signin?callbackUrl=/products/${id}`); return; }
     if (product.productType === 'subscription' && !selectedPeriod) { toast.error('Please select a subscription period'); return; }
     if (product.productType === 'topup' && !selectedAmount) { toast.error('Please select a top-up amount'); return; }
-    
+
     // Pass the correct price and choice to cart
-    addItem({ 
-      ...product, 
-      price: effectivePrice, 
-      selectedPeriod: selectedPeriod?.label, 
-      selectedAmount: selectedAmount?.label 
+    addItem({
+      ...product,
+      price: effectivePrice,
+      selectedPeriod: selectedPeriod?.label,
+      selectedAmount: selectedAmount?.label
     });
     router.push('/checkout');
   };
@@ -107,12 +111,12 @@ export default function ProductDetailPage() {
     }
     if (product.productType === 'subscription' && !selectedPeriod) { toast.error('Please select a subscription period'); return; }
     if (product.productType === 'topup' && !selectedAmount) { toast.error('Please select a top-up amount'); return; }
-    
-    addItem({ 
-      ...product, 
-      price: effectivePrice, 
-      selectedPeriod: selectedPeriod?.label, 
-      selectedAmount: selectedAmount?.label 
+
+    addItem({
+      ...product,
+      price: effectivePrice,
+      selectedPeriod: selectedPeriod?.label,
+      selectedAmount: selectedAmount?.label
     });
     toast.success(`${product.name} added to cart`);
   };
@@ -120,6 +124,7 @@ export default function ProductDetailPage() {
   async function handleSubmitReview(e: React.FormEvent) {
     e.preventDefault();
     if (!session) { router.push(`/auth/signin?callbackUrl=/products/${id}`); return; }
+    setSubmitting(true);
     try {
       const res = await fetch(`/api/products/${id}/reviews`, {
         method: 'POST',
@@ -142,7 +147,7 @@ export default function ProductDetailPage() {
 
   if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="w-10 h-10 border-2 border-brand-gold border-t-transparent rounded-full animate-spin" /></div>;
   if (!product) return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 animate-fade-up">
       <h2 className="font-display font-semibold text-2xl">Product not found</h2>
       <Link href="/products" className="btn-gold px-6 py-3 rounded-xl font-semibold">Browse Products</Link>
     </div>
@@ -161,26 +166,38 @@ export default function ProductDetailPage() {
     ? ((product.rating * baseReviews) + reviews.reduce((s: number, r: any) => s + r.rating, 0)) / totalReviewCount
     : product.rating || 4.5;
 
+  const optionClass = (selected: boolean, soldOut: boolean, tone: string) =>
+    `relative flex items-center justify-between px-5 py-4 min-h-[56px] rounded-xl border-2 transition-[border-color,background-color,transform] duration-150 ${
+      soldOut
+        ? 'border-red-500/20 bg-red-500/5 opacity-60 cursor-not-allowed'
+        : selected
+        ? `${tone} `
+        : 'border-white/10 hover:border-white/20 bg-white/5 active:scale-[0.98]'
+    }`;
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <div className="pt-24 pb-20 px-4 max-w-7xl mx-auto w-full flex-1">
-        <Link href="/products" className="inline-flex items-center gap-2 text-sm text-white/55 hover:text-white mb-8 transition-colors"><ArrowLeft size={14} /> Back to Products</Link>
+        <Link href="/products" className="inline-flex items-center gap-2 text-sm text-white/55 hover:text-white mb-8 py-2 transition-colors animate-fade-in"><ArrowLeft size={14} /> Back to Products</Link>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Images */}
-          <div>
+          <div className="animate-fade-up">
             <Tilt max={4} className="mb-4" innerClassName="rounded-2xl">
             <div className="relative h-80 sm:h-96 rounded-2xl overflow-hidden bg-brand-navy-3 border border-white/5" style={{ boxShadow: 'var(--depth-2)' }}>
-              {product.images?.[activeImg] ? <Image src={product.images[activeImg]} alt={product.name} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
+              {product.images?.[activeImg]
+                // keyed on the image, so picking a thumbnail fades the new picture in over the old frame
+                ? <div key={activeImg} className="absolute inset-0 animate-fade-in"><Image src={product.images[activeImg]} alt={product.name} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" priority={activeImg === 0} /></div>
                 : <div className="w-full h-full flex items-center justify-center"><Zap size={60} className="text-brand-gold/20" /></div>}
               {discount > 0 && <div className="absolute top-4 left-4 bg-brand-accent text-white text-xs font-medium px-3 py-1 rounded-full">-{discount}% OFF</div>}
             </div>
             </Tilt>
             {product.images?.length > 1 && (
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {product.images.map((img: string, i: number) => (
-                  <button key={i} onClick={() => setActiveImg(i)} className={`relative w-16 h-16 rounded-lg overflow-hidden border-2 transition-colors ${activeImg === i ? 'border-brand-gold' : 'border-white/10'}`}>
-                    <Image src={img} alt={`view ${i + 1}`} fill className="object-cover" sizes="64px" />
+                  <button key={i} onClick={() => setActiveImg(i)} aria-label={`Show picture ${i + 1}`} aria-pressed={activeImg === i}
+                    className={`relative w-16 h-16 rounded-lg overflow-hidden border-2 transition-[border-color,transform] duration-150 active:scale-95 ${activeImg === i ? 'border-brand-gold' : 'border-white/10'}`}>
+                    <Image src={img} alt="" fill className="object-cover" sizes="64px" />
                   </button>
                 ))}
               </div>
@@ -188,7 +205,7 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Info */}
-          <div className="flex flex-col">
+          <div className="flex flex-col animate-fade-up stagger-i" style={stagger(1)}>
             <p className="text-sm text-white/55 mb-3">{product.category}</p>
             <h1 className="text-responsive-h2 mb-4 text-white">{product.name}</h1>
 
@@ -206,10 +223,10 @@ export default function ProductDetailPage() {
             <div className="flex items-baseline gap-3 mb-6 animate-fade-in" key={effectivePrice}>
               {(isSubscription || isTopup) ? (
                 effectivePrice ? (
-                  <span className="text-4xl font-semibold text-gold-gradient">৳{effectivePrice}</span>
+                  <span className="text-4xl font-semibold text-gold-gradient tabular">৳{effectivePrice}</span>
                 ) : (
                   product.priceMin && product.priceMax ? (
-                    <span className="text-4xl font-semibold text-gold-gradient">৳{product.priceMin}–৳{product.priceMax}</span>
+                    <span className="text-4xl font-semibold text-gold-gradient tabular">৳{product.priceMin}–৳{product.priceMax}</span>
                   ) : (
                     <span className="text-xl font-semibold text-brand-gold bg-brand-gold/10 px-4 py-2 rounded-xl border border-brand-gold/20">
                       {isSubscription ? 'Select a Period' : 'Select an Amount'}
@@ -217,10 +234,10 @@ export default function ProductDetailPage() {
                   )
                 )
               ) : (
-                <span className="text-4xl font-semibold text-gold-gradient">৳{product.price}</span>
+                <span className="text-4xl font-semibold text-gold-gradient tabular">৳{product.price}</span>
               )}
               {product.originalPrice && !selectedPeriod && !selectedAmount && (
-                <span className="text-lg text-white/55 line-through">৳{product.originalPrice}</span>
+                <span className="text-lg text-white/55 line-through tabular">৳{product.originalPrice}</span>
               )}
             </div>
 
@@ -228,25 +245,20 @@ export default function ProductDetailPage() {
 
             {isSubscription && product.periods?.length > 0 && (
               <div className="mb-8">
-                <p className="text-xs text-white/55 mb-4 font-medium">Select Period</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <p className="text-xs text-white/55 mb-4 font-medium" id="period-label">Select Period</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" role="group" aria-labelledby="period-label">
                   {product.periods.map((p: any, i: number) => (
                     <button key={i} type="button"
                       disabled={p.soldOut}
+                      aria-pressed={selectedPeriod?.label === p.label}
                       onClick={() => !p.soldOut && setSelectedPeriod(p)}
-                      className={`relative flex items-center justify-between px-5 py-4 rounded-xl border-2 transition-colors ${
-                        p.soldOut
-                          ? 'border-red-500/20 bg-red-500/5 opacity-60 cursor-not-allowed'
-                          : selectedPeriod?.label === p.label
-                          ? 'border-amber-400 bg-amber-400/10 '
-                          : 'border-white/10 hover:border-white/20 bg-white/5'
-                      }`}>
+                      className={optionClass(selectedPeriod?.label === p.label, !!p.soldOut, 'border-amber-400 bg-amber-400/10')}>
                       <span className={`text-sm font-medium ${p.soldOut ? 'text-white/55' : selectedPeriod?.label === p.label ? 'text-amber-400' : 'text-white/70'}`}>{p.label}</span>
                       {p.soldOut
                         ? <span className="text-xs font-medium text-red-400 bg-red-500/10 px-2 py-1 rounded-lg border border-red-500/20">Sold Out</span>
-                        : <span className={`text-sm font-medium ${selectedPeriod?.label === p.label ? 'text-amber-400' : 'text-white/55'}`}>৳{p.price}</span>
+                        : <span className={`text-sm font-medium tabular ${selectedPeriod?.label === p.label ? 'text-amber-400' : 'text-white/55'}`}>৳{p.price}</span>
                       }
-                      {selectedPeriod?.label === p.label && !p.soldOut && <Check size={14} className="absolute top-2 right-2 text-amber-400" />}
+                      {selectedPeriod?.label === p.label && !p.soldOut && <Check size={14} className="absolute top-2 right-2 text-amber-400 animate-pop" />}
                     </button>
                   ))}
                 </div>
@@ -255,25 +267,20 @@ export default function ProductDetailPage() {
 
             {isTopup && product.topupAmounts?.length > 0 && (
               <div className="mb-8">
-                <p className="text-xs text-white/55 mb-4 font-medium">Select Amount</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <p className="text-xs text-white/55 mb-4 font-medium" id="amount-label">Select Amount</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" role="group" aria-labelledby="amount-label">
                   {product.topupAmounts.map((a: any, i: number) => (
                     <button key={i} type="button"
                       disabled={a.soldOut}
+                      aria-pressed={selectedAmount?.label === a.label}
                       onClick={() => !a.soldOut && setSelectedAmount(a)}
-                      className={`relative flex items-center justify-between px-5 py-4 rounded-xl border-2 transition-colors ${
-                        a.soldOut
-                          ? 'border-red-500/20 bg-red-500/5 opacity-60 cursor-not-allowed'
-                          : selectedAmount?.label === a.label
-                          ? 'border-green-400 bg-green-400/10 '
-                          : 'border-white/10 hover:border-white/20 bg-white/5'
-                      }`}>
+                      className={optionClass(selectedAmount?.label === a.label, !!a.soldOut, 'border-green-400 bg-green-400/10')}>
                       <span className={`text-sm font-medium ${a.soldOut ? 'text-white/55' : selectedAmount?.label === a.label ? 'text-green-400' : 'text-white/70'}`}>{a.label}</span>
                       {a.soldOut
                         ? <span className="text-xs font-medium text-red-400 bg-red-500/10 px-2 py-1 rounded-lg border border-red-500/20">Sold Out</span>
-                        : <span className={`text-sm font-medium ${selectedAmount?.label === a.label ? 'text-green-400' : 'text-white/55'}`}>৳{a.price}</span>
+                        : <span className={`text-sm font-medium tabular ${selectedAmount?.label === a.label ? 'text-green-400' : 'text-white/55'}`}>৳{a.price}</span>
                       }
-                      {selectedAmount?.label === a.label && !a.soldOut && <Check size={14} className="absolute top-2 right-2 text-green-400" />}
+                      {selectedAmount?.label === a.label && !a.soldOut && <Check size={14} className="absolute top-2 right-2 text-green-400 animate-pop" />}
                     </button>
                   ))}
                 </div>
@@ -288,7 +295,7 @@ export default function ProductDetailPage() {
               </button>
               <button onClick={handleAddToCart}
                 disabled={product.soldOut || (isSubscription && selectedPeriod?.soldOut) || (isTopup && selectedAmount?.soldOut)}
-                className="w-full glass border border-white/10 hover:border-brand-gold/30 py-4 rounded-xl font-semibold text-base flex items-center justify-center gap-2 text-white/80 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                className="w-full glass border border-white/10 hover:border-brand-gold/30 py-4 rounded-xl font-semibold text-base flex items-center justify-center gap-2 text-white/80 hover:text-white transition-[color,border-color,transform] duration-150 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100">
                 <ShoppingCart size={18} /> Add to Cart
               </button>
             </div>
@@ -305,16 +312,16 @@ export default function ProductDetailPage() {
         </div>
 
         {/* ── Reviews Section ── */}
-        <div className="mt-16">
+        <div className="mt-16 animate-fade-up stagger-i" style={stagger(3)}>
           <div className="flex items-center gap-3 mb-8">
             <h2 className="font-display font-semibold text-2xl">Customer Reviews</h2>
             <span className="glass px-3 py-1 rounded-full text-sm text-white/55 border border-white/10">{totalReviewCount} reviews</span>
           </div>
 
           {/* Rating summary */}
-          <div className="glass rounded-2xl p-6 border border-white/8 mb-8 flex items-center gap-8">
+          <div className="glass rounded-2xl p-6 border border-white/8 mb-8 flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-8">
             <div className="text-center">
-              <p className="text-5xl font-semibold text-gold-gradient">{avgRating.toFixed(1)}</p>
+              <p className="text-5xl font-semibold text-gold-gradient tabular">{avgRating.toFixed(1)}</p>
               <div className="flex justify-center mt-2">
                 {[1, 2, 3, 4, 5].map(s => (
                   <Star key={s} size={16} className={s <= Math.round(avgRating) ? 'text-amber-400 fill-amber-400' : 'text-white/55'} />
@@ -331,9 +338,10 @@ export default function ProductDetailPage() {
                     <span className="text-xs text-white/55 w-3">{star}</span>
                     <Star size={12} className="text-amber-400 fill-amber-400 flex-shrink-0" />
                     <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                      <div className="h-full bg-amber-400 rounded-full transition-all" style={{ width: `${pct}%` }} />
+                      {/* the bar fills from the left once when the section appears */}
+                      <div className="h-full bg-amber-400 rounded-full grow-x" style={{ width: `${pct}%`, animationDelay: `${(5 - star) * 70 + 300}ms` }} />
                     </div>
-                    <span className="text-xs text-white/55 w-6 text-right">{count}</span>
+                    <span className="text-xs text-white/55 w-6 text-right tabular">{count}</span>
                   </div>
                 );
               })}
@@ -349,8 +357,8 @@ export default function ProductDetailPage() {
                 <Link href={`/auth/signin?callbackUrl=/products/${id}`} className="btn-gold px-6 py-2.5 rounded-xl text-sm font-semibold inline-block">Sign In</Link>
               </div>
             ) : hasReviewed ? (
-              <div className="flex items-center gap-3 py-4 px-5 bg-green-500/10 border border-green-500/20 rounded-xl">
-                <Check size={18} className="text-green-400 flex-shrink-0" />
+              <div className="flex items-center gap-3 py-4 px-5 bg-green-500/10 border border-green-500/20 rounded-xl animate-fade-up">
+                <Check size={18} className="text-green-400 flex-shrink-0 animate-pop" />
                 <p className="text-sm text-green-300">You have already reviewed this product. Thank you.</p>
               </div>
             ) : (
@@ -362,6 +370,7 @@ export default function ProductDetailPage() {
                 <button
                   type="submit"
                   disabled={submitting}
+                  aria-busy={submitting}
                   className="btn-gold px-6 py-2.5 rounded-xl text-sm font-semibold disabled:opacity-50 flex items-center gap-2"
                 >
                   {submitting
@@ -376,8 +385,8 @@ export default function ProductDetailPage() {
           {/* Reviews list */}
           {reviews.length > 0 ? (
             <div className="space-y-4">
-              {reviews.map((review: any) => (
-                <div key={review._id} className="glass rounded-2xl p-5 border border-white/8">
+              {reviews.map((review: any, i: number) => (
+                <div key={review._id} className="glass rounded-2xl p-5 border border-white/8 animate-fade-up stagger-i" style={stagger(i)}>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-full bg-brand-gold/20 flex items-center justify-center text-sm font-semibold text-brand-gold">
@@ -406,9 +415,9 @@ export default function ProductDetailPage() {
         </div>
       </div>
       <Footer />
-      <StockModal 
-        isOpen={showStockModal} 
-        onClose={() => setShowStockModal(false)} 
+      <StockModal
+        isOpen={showStockModal}
+        onClose={() => setShowStockModal(false)}
       />
     </div>
   );

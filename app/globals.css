@@ -20,7 +20,11 @@
   --gold-hover: #f7b21f;
   --gold-edge: #9a6700; /* the "side" of a gold keycap */
 
+  /* motion: one strong ease-out for entrances, one short duration scale */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-press: 120ms;
+  --dur-hover: 180ms;
+  --dur-enter: 450ms;
 
   /* kept so older inline references keep resolving */
   --gold-light: #f7b21f;
@@ -41,13 +45,29 @@
 }
 
 * { box-sizing: border-box; padding: 0; margin: 0; }
-html { scroll-behavior: smooth; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
 
 body {
   background-color: var(--bg);
   color: var(--text);
   font-family: var(--font-body), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  min-height: 100dvh;
+  /* `clip`, not `hidden`: stops sideways overflow without turning body into a scroll container */
+  overflow-x: clip;
+  /* notch and home-indicator room; zero on devices without them */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+a, button, [role='button'], summary, label {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 ::-webkit-scrollbar { width: 8px; }
@@ -86,9 +106,8 @@ body {
   font-weight: 600;
   position: relative;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 3px 0 var(--gold-edge), 0 10px 16px -6px rgba(0, 0, 0, 0.55);
-  transition: background-color 150ms var(--ease), box-shadow 150ms var(--ease), transform 150ms var(--ease), opacity 150ms var(--ease);
+  transition: background-color var(--dur-hover) var(--ease), box-shadow var(--dur-press) var(--ease), transform var(--dur-press) var(--ease), opacity var(--dur-hover) var(--ease);
 }
-.btn-gold:hover { background: var(--gold-hover); }
 .btn-gold:active:not(:disabled) {
   transform: translateY(2px);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 var(--gold-edge), 0 3px 6px -2px rgba(0, 0, 0, 0.55);
@@ -101,13 +120,25 @@ body {
   color: var(--text);
   border: 1px solid var(--line);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 3px 0 #05060a, 0 10px 16px -6px rgba(0, 0, 0, 0.55);
-  transition: background-color 150ms var(--ease), box-shadow 150ms var(--ease), transform 150ms var(--ease);
+  transition: background-color var(--dur-hover) var(--ease), box-shadow var(--dur-press) var(--ease), transform var(--dur-press) var(--ease);
 }
-.btn-key:hover { background: #222735; }
 .btn-key:active { transform: translateY(2px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 1px 0 #05060a; }
 
-.product-card { transition: border-color 180ms var(--ease); }
-.product-card:hover { border-color: rgba(238, 240, 245, 0.16); }
+/* hover only where a pointer can really hover: no sticky highlights after a tap on phones */
+@media (hover: hover) and (pointer: fine) {
+  .btn-gold:hover:not(:disabled) { background: var(--gold-hover); }
+  .btn-key:hover { background: #222735; }
+  .product-card:hover { border-color: rgba(238, 240, 245, 0.16); }
+  .payment-card:hover { border-color: rgba(238, 240, 245, 0.16); }
+  .admin-nav-item:hover { background: var(--raised); color: var(--text); }
+}
+
+/* comfortable tap targets on touch screens */
+@media (pointer: coarse) {
+  .btn-gold, .btn-key { min-height: 44px; }
+}
+
+.product-card { transition: border-color var(--dur-hover) var(--ease); }
 
 /* recessed input: pressed into the surface */
 .input-dark {
@@ -116,12 +147,14 @@ body {
   box-shadow: var(--depth-inset);
   color: var(--text);
   border-radius: 10px;
-  padding: 12px 16px;
   width: 100%;
   font-size: 14px;
   transition: border-color 150ms var(--ease);
   outline: none;
 }
+/* Default padding at zero specificity: this rule sits after Tailwind's utilities, so a plain
+   `padding` here would beat `pl-10` / `pl-12` and put the field icons on top of the text. */
+:where(.input-dark) { padding: 12px 16px; }
 .input-dark:focus { border-color: rgba(240, 165, 0, 0.6); }
 .input-dark::placeholder { color: var(--text-3); }
 
@@ -135,9 +168,9 @@ body {
   padding: 16px;
   background: var(--card);
   box-shadow: var(--depth-1);
-  transition: background-color 150ms var(--ease), border-color 150ms var(--ease), box-shadow 150ms var(--ease);
+  transition: background-color 150ms var(--ease), border-color 150ms var(--ease), box-shadow 150ms var(--ease), transform var(--dur-press) var(--ease);
 }
-.payment-card:hover { border-color: rgba(238, 240, 245, 0.16); }
+.payment-card:active { transform: scale(0.985); }
 .payment-card.selected {
   border-color: var(--gold);
   background: var(--raised);
@@ -154,28 +187,113 @@ body {
   color: var(--text-2); text-decoration: none;
   transition: background-color 150ms var(--ease), color 150ms var(--ease);
 }
-.admin-nav-item:hover { background: var(--raised); color: var(--text); }
 .admin-nav-item.active { background: var(--raised); color: var(--text); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12); }
 
 .status-pending  { background: rgba(245, 158, 11, 0.12); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.24); }
 .status-approved { background: rgba(76, 195, 138, 0.12); color: #4cc38a; border: 1px solid rgba(76, 195, 138, 0.24); }
 .status-cancelled{ background: rgba(229, 72, 77, 0.12); color: #e5484d; border: 1px solid rgba(229, 72, 77, 0.24); }
 
+/* one short fade and rise on load, one curve. Looping motion is removed. */
+@keyframes fadeUp { 0% { opacity: 0; transform: translateY(12px); } 100% { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+/* Route change fade. Opacity only: a transform on a page-level wrapper would
+   become the containing block for the fixed navbar and every modal. */
+@keyframes pageIn { from { opacity: 0; } to { opacity: 1; } }
+
+.animate-fade-up { animation: fadeUp var(--dur-enter) var(--ease) both; }
+.animate-fade-in { animation: fadeIn 0.3s var(--ease) both; }
+.page-enter { animation: pageIn 0.32s var(--ease) backwards; }
+/* these used to loop forever. They now render still. */
+.animate-ping-slow, .animate-pulse-slow, .animate-bounce-subtle, .animate-float { animation: none; }
+
+/* cart badge: a small bump each time the count changes (re-mounted via key) */
+@keyframes pop { 0% { transform: scale(0.6); } 55% { transform: scale(1.18); } 100% { transform: scale(1); } }
+.animate-pop { animation: pop 320ms var(--ease) both; }
+
+/* Stagger delays. These MUST come after every .animate-* rule above: each of those uses the
+   `animation` shorthand, which resets animation-delay to 0s when it comes later at equal specificity. */
 .stagger-1 { animation-delay: 0.05s; }
 .stagger-2 { animation-delay: 0.1s; }
 .stagger-3 { animation-delay: 0.15s; }
 .stagger-4 { animation-delay: 0.2s; }
+/* index-driven stagger for grids and stacked blocks: style={{ '--i': n }} (see components/motion.ts) */
+.stagger-i { animation-delay: calc(var(--i, 0) * 45ms); }
 
-/* one short fade and rise on load, one curve. Looping motion is removed. */
-@keyframes fadeUp { 0% { opacity: 0; transform: translateY(12px); } 100% { opacity: 1; transform: translateY(0); } }
-@keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
-@keyframes pageIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+/* ------------------------------------------------------------------
+   Mobile drawer. Always mounted so it can animate out as well as in;
+   `visibility` takes it out of tab order and the accessibility tree
+   once the exit finishes.
+   ------------------------------------------------------------------ */
+.drawer-backdrop {
+  opacity: 0; visibility: hidden;
+  transition: opacity 240ms var(--ease), visibility 0s linear 240ms;
+}
+.drawer-backdrop[data-open='true'] {
+  opacity: 1; visibility: visible;
+  transition: opacity 240ms var(--ease), visibility 0s;
+}
+.drawer-panel {
+  opacity: 0; visibility: hidden; transform: translateY(-8px);
+  transition: opacity 200ms var(--ease), transform 260ms var(--ease), visibility 0s linear 260ms;
+}
+.drawer-panel[data-open='true'] {
+  opacity: 1; visibility: visible; transform: none;
+  transition: opacity 200ms var(--ease), transform 260ms var(--ease), visibility 0s;
+}
+.drawer-panel[data-open='true'] .drawer-item {
+  animation: fadeUp 340ms var(--ease) backwards;
+  animation-delay: calc(var(--i, 0) * 40ms + 60ms);
+}
 
-.animate-fade-up { animation: fadeUp 0.45s var(--ease) both; }
-.animate-fade-in { animation: fadeIn 0.3s var(--ease) both; }
-.page-enter { animation: pageIn 0.4s var(--ease) both; }
-/* these used to loop forever. They now render still. */
-.animate-ping-slow, .animate-pulse-slow, .animate-bounce-subtle, .animate-float { animation: none; }
+/* ------------------------------------------------------------------
+   Hero backdrop: a flat ruled grid that fades out toward the edges.
+   Sits on its own Parallax layer. No text moves with the scroll.
+   ------------------------------------------------------------------ */
+.hero-grid {
+  position: absolute; inset: -12% 0 0 0;
+  pointer-events: none;
+  opacity: 0.55;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 72% 42%, #000 0%, transparent 75%);
+  mask-image: radial-gradient(ellipse 70% 60% at 72% 42%, #000 0%, transparent 75%);
+}
+
+/* reserved space for list sections while data loads, so nothing jumps */
+.skeleton { background: var(--card); border: 1px solid var(--line); border-radius: 16px; }
+
+/* a single short sideways nudge for a field that needs attention */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-5px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(2px); }
+}
+.animate-shake { animation: shake 360ms var(--ease) both; }
+
+/* a progress line that fills from the left */
+@keyframes growX { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.grow-x { transform-origin: left center; animation: growX 600ms var(--ease) 450ms backwards; }
+
+/* a list row that collapses out instead of vanishing. The row is the grid's only child. */
+.row-collapse {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 260ms var(--ease), opacity 200ms var(--ease);
+}
+.row-collapse > * { min-height: 0; }
+.row-collapse[data-leaving='true'] { grid-template-rows: 0fr; opacity: 0; }
+.row-collapse[data-leaving='true'] > * { overflow: hidden; }
+
+/* admin sidebar: slides on small screens; hidden from tab order while closed */
+.admin-sidebar { transition: transform 300ms var(--ease), visibility 0s linear 300ms; }
+.admin-sidebar[data-open='true'] { transition: transform 300ms var(--ease), visibility 0s; }
+@media (max-width: 1023px) {
+  .admin-sidebar:not([data-open='true']) { visibility: hidden; transform: translateX(-100%); }
+}
 
 /* ------------------------------------------------------------------
    3D system
@@ -189,7 +307,7 @@ body {
 .tilt-wrap:hover { z-index: 2; }
 .tilt {
   transform-style: preserve-3d;
-  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(var(--s, 1));
   transition: transform 600ms var(--ease);
   will-change: transform;
   position: relative;
@@ -227,7 +345,15 @@ body {
   .tilt::after { display: none; }
   .lift-1, .lift-2, .lift-3 { transform: none; }
   .reveal[data-armed='true'] { opacity: 1; transform: none; }
-  .animate-fade-up, .animate-fade-in, .page-enter { animation: none; }
+  .animate-fade-up, .animate-fade-in, .page-enter, .animate-pop, .animate-shake, .grow-x { animation: none; }
+  .row-collapse { transition: none; }
+  .admin-sidebar, .admin-sidebar[data-open='true'] { transition: none; }
+  /* loading spinners stay (they carry meaning) but slow down; pulses stop */
+  .animate-spin { animation-duration: 2.4s; }
+  .animate-pulse { animation: none; }
+  .drawer-backdrop, .drawer-backdrop[data-open='true'], .drawer-panel, .drawer-panel[data-open='true'] { transition: none; transform: none; }
+  .drawer-panel[data-open='true'] .drawer-item { animation: none; }
+  .hero-grid { transform: none !important; }
 }
 
 /* ------------------------------------------------------------------
@@ -247,7 +373,8 @@ body {
 }
 
 @media (max-width: 768px) {
-  .input-dark { padding: 14px 18px; font-size: 16px; border-radius: 12px; }
+  .input-dark { font-size: 16px; border-radius: 12px; }
+  :where(.input-dark) { padding: 14px 18px; }
 }
 
 .preserve-3d { transform-style: preserve-3d; }

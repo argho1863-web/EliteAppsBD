@@ -7,6 +7,7 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useCart } from '@/components/CartContext';
+import { stagger } from '@/components/motion';
 import toast from 'react-hot-toast';
 import { ArrowLeft, Copy, Check, Zap, Mail, Clock } from 'lucide-react';
 
@@ -110,10 +111,10 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           // FIXED: Casting product as any for custom properties
           items: items.map(({ product, quantity }) => ({
-            productId: product._id, 
-            productName: product.name, 
+            productId: product._id,
+            productName: product.name,
             price: product.price,
-            quantity, 
+            quantity,
             image: product.images?.[0] || '',
             selectedPeriod: (product as any).selectedPeriod || null,
             selectedAmount: (product as any).selectedAmount || null,
@@ -139,10 +140,10 @@ export default function CheckoutPage() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <div className="pt-24 pb-20 px-4 max-w-5xl mx-auto w-full flex-1">
-        <Link href="/cart" className="inline-flex items-center gap-2 text-sm text-white/55 hover:text-white mb-8 transition-colors">
+        <Link href="/cart" className="inline-flex items-center gap-2 text-sm text-white/55 hover:text-white mb-8 py-2 transition-colors animate-fade-in">
           <ArrowLeft size={14} /> Back to Cart
         </Link>
-        <div className="mb-8">
+        <div className="mb-8 animate-fade-up">
           <p className="text-xs text-white/55 font-medium mb-2">
             {hasDetails ? 'Step 2 of 2' : 'Checkout'}
           </p>
@@ -153,7 +154,7 @@ export default function CheckoutPage() {
           <div className="lg:col-span-3 space-y-6">
 
             {/* Email delivery alert */}
-            <div className="flex items-start gap-3 glass rounded-2xl p-4 border border-blue-400/30 bg-blue-400/5">
+            <div className="flex items-start gap-3 glass rounded-2xl p-4 border border-blue-400/30 bg-blue-400/5 animate-fade-up stagger-i" style={stagger(1)}>
               <Mail size={18} className="text-white/70 mt-0.5 flex-shrink-0" />
               <div>
                 <p className="text-sm font-medium text-blue-300">Product Will Be Delivered to Your Signed-In Email</p>
@@ -163,16 +164,16 @@ export default function CheckoutPage() {
 
             {/* Details summary */}
             {hasDetails && (
-              <div className="glass rounded-2xl p-5 border border-brand-gold/20 bg-brand-gold/5">
+              <div className="glass rounded-2xl p-5 border border-brand-gold/20 bg-brand-gold/5 animate-fade-up stagger-i" style={stagger(2)}>
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-medium text-brand-gold">Your details</h3>
-                  <Link href="/details" className="text-xs text-white/55 hover:text-white transition-colors">Edit</Link>
+                  <Link href="/details" className="text-xs text-white/55 hover:text-white transition-colors py-2 px-2 -my-2 -mr-2">Edit</Link>
                 </div>
                 <div className="space-y-1.5">
                   {Object.entries(customerDetails).map(([key, value]) => (
-                    <div key={key} className="flex justify-between text-xs">
+                    <div key={key} className="flex justify-between gap-4 text-xs">
                       <span className="text-white/55">{key}</span>
-                      <span className="text-white/80 font-medium">{value}</span>
+                      <span className="text-white/80 font-medium break-all text-right">{value}</span>
                     </div>
                   ))}
                 </div>
@@ -180,22 +181,23 @@ export default function CheckoutPage() {
             )}
 
             {/* Payment method */}
-            <div className="glass rounded-2xl p-6 border border-white/8">
+            <div className="glass rounded-2xl p-6 border border-white/8 animate-fade-up stagger-i" style={stagger(3)}>
               <h2 className="font-display font-semibold text-xl mb-6 flex items-center gap-3 text-white/90">
                 <span className="w-8 h-8 rounded-xl bg-brand-gold text-brand-navy text-xs font-semibold flex items-center justify-center shadow-gold">
                   {hasDetails ? '2' : '1'}
                 </span>
                 Payment Method
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4" role="group" aria-label="Payment method">
                 {PAYMENT_METHODS.map(method => (
                   <button key={method.id}
+                    aria-pressed={selectedMethod === method.id}
                     onClick={() => { setSelectedMethod(method.id); setTransactionId(''); setTxError(''); setCopied(false); }}
-                    className={`rounded-2xl p-5 border-2 text-left transition-all font-semibold text-base shadow-sm ${selectedMethod === method.id ? 'border-current scale-[1.02] ' : 'border-white/10 hover:border-white/20 bg-white/5 opacity-70 hover:opacity-100'}`}
+                    className={`rounded-2xl p-5 min-h-[56px] border-2 text-left transition-[transform,border-color,background-color,opacity] duration-150 active:scale-[0.98] font-semibold text-base shadow-sm ${selectedMethod === method.id ? 'border-current scale-[1.02] ' : 'border-white/10 hover:border-white/20 bg-white/5 opacity-70 hover:opacity-100'}`}
                     style={selectedMethod === method.id ? { borderColor: method.color, background: `${method.color}15`, color: method.color } : {}}>
                     <div className="flex items-center justify-between">
                       <span>{method.name}</span>
-                      {selectedMethod === method.id && <Check size={18} />}
+                      {selectedMethod === method.id && <span className="animate-pop"><Check size={18} /></span>}
                     </div>
                   </button>
                 ))}
@@ -203,17 +205,21 @@ export default function CheckoutPage() {
             </div>
 
             {selectedPayment && (
-              <div className="rounded-2xl p-6 animate-fade-up" style={{ background: selectedPayment.bg }}>
+              // keyed on the method, so switching wallets re-plays the entrance and the panel visibly changes
+              <div key={selectedPayment.id} className="rounded-2xl p-6 animate-fade-up" style={{ background: selectedPayment.bg }}>
                 <h2 className="font-semibold text-white text-center text-base mb-5">Enter Transaction ID</h2>
                 <div className="mb-2">
-                  <input type="text" value={transactionId}
+                  <label htmlFor="tx-id" className="sr-only">{selectedPayment.name} transaction ID</label>
+                  <input id="tx-id" type="text" value={transactionId}
                     onChange={e => handleTxChange(e.target.value.toUpperCase())}
                     placeholder={`${selectedPayment.name} Transaction ID`}
-                    className={`w-full rounded-xl px-4 py-3 text-sm text-gray-800 font-mono outline-none border-2 ${txError ? 'border-red-400' : isTxValid ? 'border-green-400' : 'border-transparent'}`}
+                    aria-invalid={!!txError}
+                    autoComplete="off" autoCapitalize="characters" spellCheck={false}
+                    className={`w-full rounded-xl px-4 py-3 text-base sm:text-sm text-gray-800 font-mono outline-none border-2 transition-colors duration-150 ${txError ? 'border-red-400' : isTxValid ? 'border-green-400' : 'border-transparent'}`}
                     style={{ background: 'rgba(255,255,255,0.95)' }} />
                 </div>
-                {txError && <p className="text-xs text-red-200 mb-4 px-1 font-medium">{txError}</p>}
-                {isTxValid && <p className="text-xs text-green-200 mb-4 px-1 font-medium">Verified format: {transactionId}</p>}
+                {txError && <p role="alert" className="text-xs text-red-200 mb-4 px-1 font-medium animate-fade-in">{txError}</p>}
+                {isTxValid && <p className="text-xs text-green-200 mb-4 px-1 font-medium animate-fade-in">Verified format: {transactionId}</p>}
                 {!txError && !isTxValid && <p className="text-xs text-white/70 mb-4 px-1">Example: {selectedPayment.txHint}</p>}
                 <p className="text-xs text-white/55 mb-4 px-1">Your Transaction ID will be verified manually by our team.</p>
                 <ul className="space-y-3 text-sm text-white/90 mb-5">
@@ -221,7 +227,7 @@ export default function CheckoutPage() {
                   <li className="flex items-start gap-2"><span>•</span><span>Click <strong className="text-yellow-300">"Send Money"</strong>.</span></li>
                   <li className="flex items-start gap-2"><span>•</span>
                     <span>Recipient: <strong className="text-yellow-300 font-mono">{selectedPayment.number}</strong>{' '}
-                      <button onClick={copyNumber} className="inline-flex items-center gap-1 text-xs bg-black/30 hover:bg-black/50 px-2 py-0.5 rounded-lg ml-1">
+                      <button onClick={copyNumber} aria-label={copied ? 'Number copied' : 'Copy recipient number'} className="inline-flex items-center gap-1 text-xs bg-black/30 hover:bg-black/50 active:scale-95 transition-[background-color,transform] duration-150 px-3 py-1.5 rounded-lg ml-1 min-h-[32px]">
                         {copied ? <Check size={11} /> : <Copy size={11} />}{copied ? 'Copied' : 'Copy'}
                       </button>
                     </span>
@@ -230,8 +236,8 @@ export default function CheckoutPage() {
                   <li className="flex items-start gap-2"><span>•</span><span>Enter PIN. You'll get a confirmation SMS with your Transaction ID.</span></li>
                   <li className="flex items-start gap-2"><span>•</span><span>Enter that <strong className="text-yellow-300">Transaction ID</strong> above and click VERIFY.</span></li>
                 </ul>
-                <button onClick={handleSubmit} disabled={loading || !isTxValid}
-                  className="w-full py-4 rounded-xl font-semibold text-white text-base disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:brightness-90"
+                <button onClick={handleSubmit} disabled={loading || !isTxValid} aria-busy={loading}
+                  className="w-full py-4 min-h-[52px] rounded-xl font-semibold text-white text-base disabled:opacity-50 disabled:cursor-not-allowed transition-[filter,transform] duration-150 hover:brightness-90 active:scale-[0.98] disabled:active:scale-100"
                   style={{ background: 'rgba(0,0,0,0.35)' }}>
                   {loading ? <span className="flex items-center justify-center gap-2"><div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Processing...</span> : 'VERIFY'}
                 </button>
@@ -240,7 +246,7 @@ export default function CheckoutPage() {
           </div>
 
           {/* Order summary */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 animate-fade-up stagger-i" style={stagger(2)}>
             <div className="glass rounded-2xl p-6 border border-white/8 sticky top-24">
               <h3 className="font-display font-semibold text-lg mb-5">Order Summary</h3>
               <div className="space-y-3 mb-5 max-h-60 overflow-y-auto pr-1">
@@ -256,16 +262,16 @@ export default function CheckoutPage() {
                       {(product as any).selectedAmount && <p className="text-xs text-green-400/80">{(product as any).selectedAmount}</p>}
                       <p className="text-xs text-white/55">Qty: {quantity}</p>
                     </div>
-                    <p className="text-xs font-medium text-white/70">৳{(product.price * quantity).toFixed(0)}</p>
+                    <p className="text-xs font-medium text-white/70 tabular">৳{(product.price * quantity).toFixed(0)}</p>
                   </div>
                 ))}
               </div>
               <div className="border-t border-white/8 pt-4">
-                <div className="flex justify-between items-center"><span className="text-sm text-white/70">Subtotal</span><span className="font-medium">৳{totalPrice.toFixed(0)}</span></div>
+                <div className="flex justify-between items-center"><span className="text-sm text-white/70">Subtotal</span><span className="font-medium tabular">৳{totalPrice.toFixed(0)}</span></div>
                 <div className="flex justify-between items-center mt-2"><span className="text-sm text-white/70">Delivery</span><span className="text-green-400 text-sm font-medium">Free</span></div>
                 <div className="flex justify-between items-center mt-4 pt-4 border-t border-white/8">
                   <span className="font-semibold">Total</span>
-                  <span className="text-2xl font-semibold text-gold-gradient">৳{totalPrice.toFixed(0)}</span>
+                  <span className="text-2xl font-semibold text-gold-gradient tabular">৳{totalPrice.toFixed(0)}</span>
                 </div>
               </div>
               {session?.user && (

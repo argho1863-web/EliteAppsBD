@@ -9,7 +9,15 @@ type ThreeNS = typeof import('three');
  * with a bevel, physical materials, an image-based environment for reflections.
  *
  * Interaction: the stack turns toward the pointer and rolls back as the page scrolls.
- * There is no idle loop. The scene only renders while something is moving, then stops.
+ * On capable devices the cards also breathe slowly (capped at ~30fps).
+ *
+ * Cost control:
+ *  - low-power devices (few cores, little memory, small touch screens) get a lower
+ *    pixel ratio, simpler geometry, smaller textures and no idle motion
+ *  - rendering stops when the hero is off screen or the tab is hidden
+ *  - if idle frames run slow, the scene drops to pixel ratio 1 and stops breathing
+ *  - reduced motion: one still frame, no loop
+ *  - the host reserves its own space, so the canvas arriving never shifts layout
  */
 
 const CARDS = [
@@ -23,6 +31,25 @@ const H = 2.14;
 const R = 0.2;
 const DEPTH = 0.06;
 const BEVEL = 0.03;
+
+function detectQuality() {
+  const nav = navigator as Navigator & { deviceMemory?: number };
+  const small = window.matchMedia('(max-width: 767px)').matches;
+  const coarse = window.matchMedia('(pointer: coarse)').matches;
+  const cores = nav.hardwareConcurrency || 4;
+  const mem = nav.deviceMemory ?? 8;
+  const low = cores <= 4 || mem <= 4 || (small && coarse);
+  const dpr = window.devicePixelRatio || 1;
+  return {
+    low,
+    pixelRatio: Math.min(dpr, low ? 1.25 : small ? 1.5 : 2),
+    texSize: low ? 768 : 1024,
+    bevelSegments: low ? 2 : 4,
+    curveSegments: low ? 10 : 20,
+    maxAniso: low ? 4 : 8,
+    idle: !low && !coarse,
+  };
+}
 
 function roundedRectShape(THREE: ThreeNS, w: number, h: number, r: number) {
   const s = new THREE.Shape();
@@ -39,8 +66,8 @@ function roundedRectShape(THREE: ThreeNS, w: number, h: number, r: number) {
   return s;
 }
 
-function faceTexture(THREE: ThreeNS, c: (typeof CARDS)[number]) {
-  const cw = 1024;
+function faceTexture(THREE: ThreeNS, c: (typeof CARDS)[number], cw: number, aniso: number) {
+  const k = cw / 1024; // every size below was drawn for a 1024px-wide card
   const ch = Math.round((cw * H) / W);
   const cv = document.createElement('canvas');
   cv.width = cw; cv.height = ch;
@@ -59,36 +86,36 @@ function faceTexture(THREE: ThreeNS, c: (typeof CARDS)[number]) {
 
   // wordmark
   g.fillStyle = c.ink;
-  g.font = '600 64px system-ui, -apple-system, "Segoe UI", sans-serif';
+  g.font = `600 ${64 * k}px system-ui, -apple-system, "Segoe UI", sans-serif`;
   g.textBaseline = 'alphabetic';
-  g.fillText('EliteApps', 72, 120);
+  g.fillText('EliteApps', 72 * k, 120 * k);
 
   // chip
   g.fillStyle = c.chip;
-  const cx = cw - 72 - 120, cy = 72;
+  const cx = cw - 72 * k - 120 * k, cy = 72 * k;
   g.beginPath();
-  g.roundRect(cx, cy, 120, 90, 16);
+  g.roundRect(cx, cy, 120 * k, 90 * k, 16 * k);
   g.fill();
   g.strokeStyle = c.body;
-  g.lineWidth = 4;
+  g.lineWidth = 4 * k;
   g.beginPath();
-  g.moveTo(cx, cy + 45); g.lineTo(cx + 120, cy + 45);
-  g.moveTo(cx + 50, cy); g.lineTo(cx + 50, cy + 90);
+  g.moveTo(cx, cy + 45 * k); g.lineTo(cx + 120 * k, cy + 45 * k);
+  g.moveTo(cx + 50 * k, cy); g.lineTo(cx + 50 * k, cy + 90 * k);
   g.stroke();
 
   // masked key
   g.fillStyle = c.sub;
-  g.font = '500 54px ui-monospace, "SF Mono", Menlo, Consolas, monospace';
-  g.fillText('\u2022\u2022\u2022\u2022  \u2022\u2022\u2022\u2022  \u2022\u2022\u2022\u2022', 72, ch / 2 + 30);
+  g.font = `500 ${54 * k}px ui-monospace, "SF Mono", Menlo, Consolas, monospace`;
+  g.fillText('••••  ••••  ••••', 72 * k, ch / 2 + 30 * k);
 
   // product type
   g.fillStyle = c.ink;
-  g.font = '600 96px system-ui, -apple-system, "Segoe UI", sans-serif';
-  g.fillText(c.label, 72, ch - 72);
+  g.font = `600 ${96 * k}px system-ui, -apple-system, "Segoe UI", sans-serif`;
+  g.fillText(c.label, 72 * k, ch - 72 * k);
 
   const tex = new THREE.CanvasTexture(cv);
   tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = 8;
+  tex.anisotropy = aniso;
   return tex;
 }
 
@@ -121,16 +148,31 @@ export default function Hero3D({ className = '' }: { className?: string }) {
         if (disposed) return;
 
         const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const q = detectQuality();
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        const renderer = new THREE.WebGLRenderer({
+          antialias: !q.low,
+          alpha: true,
+          powerPreference: q.low ? 'default' : 'high-performance',
+        });
+        renderer.setPixelRatio(q.pixelRatio);
         renderer.outputColorSpace = THREE.SRGBColorSpace;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 1.05;
-        renderer.domElement.style.width = '100%';
-        renderer.domElement.style.height = '100%';
-        renderer.domElement.style.display = 'block';
-        el.appendChild(renderer.domElement);
+        const canvas = renderer.domElement;
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        canvas.style.display = 'block';
+        // the canvas fades in after the first frame so it never pops
+        canvas.style.opacity = '0';
+        canvas.style.transition = reduced ? 'none' : 'opacity 600ms cubic-bezier(0.22, 1, 0.36, 1)';
+        el.appendChild(canvas);
+
+        const onLost = (e: Event) => {
+          e.preventDefault();
+          if (!disposed) setFallback(true);
+        };
+        canvas.addEventListener('webglcontextlost', onLost);
 
         const scene = new THREE.Scene();
         const pmrem = new THREE.PMREMGenerator(renderer);
@@ -156,23 +198,24 @@ export default function Hero3D({ className = '' }: { className?: string }) {
           bevelEnabled: true,
           bevelThickness: BEVEL,
           bevelSize: BEVEL,
-          bevelSegments: 4,
-          curveSegments: 20,
+          bevelSegments: q.bevelSegments,
+          curveSegments: q.curveSegments,
         });
         bodyGeo.center();
         const faceGeo = new THREE.PlaneGeometry(W, H);
         disposables.push(bodyGeo, faceGeo);
         const frontZ = DEPTH / 2 + BEVEL + 0.003;
+        const aniso = Math.min(q.maxAniso, renderer.capabilities.getMaxAnisotropy());
 
         for (const c of CARDS) {
           const bodyMat = new THREE.MeshPhysicalMaterial({
             color: new THREE.Color(c.body),
             roughness: 0.38,
             metalness: 0.15,
-            clearcoat: 0.6,
+            clearcoat: q.low ? 0 : 0.6,
             clearcoatRoughness: 0.3,
           });
-          const tex = faceTexture(THREE, c);
+          const tex = faceTexture(THREE, c, q.texSize, aniso);
           const faceMat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.42, metalness: 0.1, alphaTest: 0.5 });
           disposables.push(bodyMat, faceMat, tex);
 
@@ -203,26 +246,38 @@ export default function Hero3D({ className = '' }: { className?: string }) {
         const cur = { x: base.x, y: base.y, s: 0 };
         let intro = reduced ? 1 : 0;
         let introStart = 0;
-        let visible = true;
+        let inView = true;
         let raf = 0;
+        let idleOn = q.idle && !reduced;
+        let lastRender = 0;
+        let slow = 0;
+        let shown = false;
 
         const ease = (t: number) => 1 - Math.pow(1 - t, 3);
+        const canRun = () => inView && !document.hidden;
 
-        const apply = () => {
+        const apply = (now: number) => {
           const k = ease(Math.min(1, Math.max(0, intro)));
-          for (const m of cardMeshes) {
-            m.obj.position.set(m.to[0] * k, m.to[1] * k, m.to[2] * k);
+          const t = now / 1000;
+          for (let i = 0; i < cardMeshes.length; i++) {
+            const m = cardMeshes[i];
+            const bob = idleOn ? Math.sin(t * 0.9 + i * 1.7) * 0.035 * k : 0;
+            m.obj.position.set(m.to[0] * k, m.to[1] * k + bob, m.to[2] * k);
             m.obj.rotation.z = m.rz * k;
           }
           group.rotation.x = cur.x + cur.s * 0.45;
-          group.rotation.y = cur.y - cur.s * 0.25;
+          group.rotation.y = cur.y - cur.s * 0.25 + (idleOn ? Math.sin(t * 0.35) * 0.05 : 0);
           group.position.y = -cur.s * 0.7;
           renderer.render(scene, camera);
+          if (!shown) {
+            shown = true;
+            canvas.style.opacity = '1';
+          }
         };
 
         const tick = (now: number) => {
           raf = 0;
-          if (disposed) return;
+          if (disposed || !canRun()) return;
           if (intro < 1) {
             if (!introStart) introStart = now;
             intro = (now - introStart) / 1100;
@@ -230,28 +285,44 @@ export default function Hero3D({ className = '' }: { className?: string }) {
           cur.x += (target.x - cur.x) * 0.1;
           cur.y += (target.y - cur.y) * 0.1;
           cur.s += (target.s - cur.s) * 0.1;
-          apply();
           const moving =
             intro < 1 ||
             Math.abs(target.x - cur.x) > 0.0005 ||
             Math.abs(target.y - cur.y) > 0.0005 ||
             Math.abs(target.s - cur.s) > 0.0005;
-          if (moving && visible) raf = requestAnimationFrame(tick);
-        };
-        const wake = () => { if (!raf && !disposed) raf = requestAnimationFrame(tick); };
 
-        const resize = () => {
-          const w = el.clientWidth || 1, h = el.clientHeight || 1;
+          if (moving || !lastRender || (idleOn && now - lastRender >= 33)) {
+            // if breathing frames keep arriving late, this device can't afford it
+            if (idleOn && !moving && lastRender) {
+              slow = now - lastRender > 70 ? slow + 1 : Math.max(0, slow - 1);
+              if (slow > 12) {
+                idleOn = false;
+                renderer.setPixelRatio(1);
+                resize();
+              }
+            }
+            apply(now);
+            lastRender = now;
+          }
+
+          if (moving || idleOn) raf = requestAnimationFrame(tick);
+          else lastRender = 0;
+        };
+        const wake = () => { if (!raf && !disposed && canRun()) raf = requestAnimationFrame(tick); };
+
+        function resize() {
+          const w = el!.clientWidth || 1, h = el!.clientHeight || 1;
           renderer.setSize(w, h, false);
           camera.aspect = w / h;
           camera.position.set(0, 0, 9.5 / Math.min(1, camera.aspect));
           camera.lookAt(0, 0, 0);
           camera.updateProjectionMatrix();
+          lastRender = 0; // force a repaint at the new size
           wake();
-        };
+        }
 
         const onPointer = (e: PointerEvent) => {
-          if (!visible || reduced) return;
+          if (!canRun() || reduced) return;
           const nx = (e.clientX / window.innerWidth) * 2 - 1;
           const ny = (e.clientY / window.innerHeight) * 2 - 1;
           target.y = base.y + nx * 0.4;
@@ -263,15 +334,16 @@ export default function Hero3D({ className = '' }: { className?: string }) {
           target.s = Math.min(1, window.scrollY / 700);
           wake();
         };
+        const onVisibility = () => { if (!document.hidden) wake(); };
 
         const ro = new ResizeObserver(resize);
         ro.observe(el);
-        const io = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; if (visible) wake(); });
+        const io = new IntersectionObserver(([entry]) => { inView = entry.isIntersecting; if (inView) wake(); });
         io.observe(el);
         window.addEventListener('pointermove', onPointer, { passive: true });
         window.addEventListener('scroll', onScroll, { passive: true });
+        document.addEventListener('visibilitychange', onVisibility);
         resize();
-        wake();
 
         cleanup = () => {
           if (raf) cancelAnimationFrame(raf);
@@ -279,12 +351,14 @@ export default function Hero3D({ className = '' }: { className?: string }) {
           io.disconnect();
           window.removeEventListener('pointermove', onPointer);
           window.removeEventListener('scroll', onScroll);
+          document.removeEventListener('visibilitychange', onVisibility);
+          canvas.removeEventListener('webglcontextlost', onLost);
           disposables.forEach((d) => d.dispose());
           envRT.dispose();
           pmrem.dispose();
           renderer.dispose();
           renderer.forceContextLoss();
-          renderer.domElement.remove();
+          canvas.remove();
         };
         if (disposed) cleanup();
       } catch {
@@ -299,6 +373,7 @@ export default function Hero3D({ className = '' }: { className?: string }) {
     <div
       ref={host}
       className={`relative ${className}`}
+      style={{ contain: 'layout paint' }}
       role="img"
       aria-label="Three digital licence cards: App, Subscription and Top-up"
     >

@@ -5,7 +5,8 @@ import { useRef, useEffect, useCallback, type ReactNode } from 'react';
  * Pointer-driven tilt. The outer element is static and owns the hit area, so
  * the rotating plane can never move out from under the pointer and flicker.
  * Children can sit above the plane with the .lift-1 / .lift-2 / .lift-3 classes.
- * Does nothing for touch input or when the person prefers reduced motion.
+ * Does nothing for touch input or when the person prefers reduced motion; the
+ * reduced-motion setting is followed live, not just read once at mount.
  */
 export default function Tilt({
   children,
@@ -25,10 +26,17 @@ export default function Tilt({
   const enabled = useRef(false);
 
   useEffect(() => {
-    const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-    const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    enabled.current = fine && !calm;
-    return () => { if (frame.current) cancelAnimationFrame(frame.current); };
+    const fine = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const calm = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const sync = () => { enabled.current = fine.matches && !calm.matches; };
+    sync();
+    fine.addEventListener('change', sync);
+    calm.addEventListener('change', sync);
+    return () => {
+      fine.removeEventListener('change', sync);
+      calm.removeEventListener('change', sync);
+      if (frame.current) cancelAnimationFrame(frame.current);
+    };
   }, []);
 
   const onMove = useCallback((e: React.PointerEvent) => {
@@ -44,6 +52,7 @@ export default function Tilt({
       p.dataset.active = 'true';
       p.style.setProperty('--ry', `${((px - 0.5) * 2 * max).toFixed(2)}deg`);
       p.style.setProperty('--rx', `${(-(py - 0.5) * 2 * max).toFixed(2)}deg`);
+      p.style.setProperty('--s', '1.015');
       p.style.setProperty('--mx', `${(px * 100).toFixed(1)}%`);
       p.style.setProperty('--my', `${(py * 100).toFixed(1)}%`);
     });
@@ -56,6 +65,7 @@ export default function Tilt({
     p.dataset.active = 'false';
     p.style.setProperty('--rx', '0deg');
     p.style.setProperty('--ry', '0deg');
+    p.style.setProperty('--s', '1');
   }, []);
 
   return (

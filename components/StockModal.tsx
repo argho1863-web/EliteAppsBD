@@ -13,31 +13,36 @@ export default function StockModal({ isOpen, onClose }: StockModalProps) {
 
   useEffect(() => {
     setMounted(true);
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = prev;
+      window.removeEventListener('keydown', onKey);
     };
-  }, [isOpen]);
+  }, [isOpen, onClose]);
 
   if (!mounted || !isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="stock-modal-title">
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/70 animate-fade-in"
         onClick={onClose}
       />
-      
+
       {/* Modal Content */}
-      <div className="relative w-full max-w-md glass rounded-2xl p-8 animate-scale-up">
-        <button 
+      <div className="relative w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto glass rounded-2xl p-6 sm:p-8 animate-scale-up">
+        <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-white/55 hover:text-white transition-colors"
+          aria-label="Close"
+          className="absolute top-2 right-2 p-3 text-white/55 hover:text-white transition-colors"
         >
           <X size={20} />
         </button>
@@ -46,25 +51,25 @@ export default function StockModal({ isOpen, onClose }: StockModalProps) {
           <div className="w-20 h-20 rounded-2xl bg-red-500/10 flex items-center justify-center mx-auto mb-6 border border-red-500/20">
             <ShoppingBag size={40} className="text-red-400" />
           </div>
-          
-          <h3 className="font-medium text-2xl mb-3 text-white">Out of stock</h3>
+
+          <h3 id="stock-modal-title" className="font-medium text-2xl mb-3 text-white">Out of stock</h3>
           <p className="text-white/70 text-base leading-relaxed mb-10">
             <strong className="text-white/90 font-medium">This product is out of stock</strong> right now. Check back later or look at something else in the catalogue.
           </p>
 
           <div className="flex flex-col gap-3">
-            <Link 
-              href="/products" 
+            <Link
+              href="/products"
               onClick={onClose}
               className="btn-gold w-full py-4 rounded-xl flex items-center justify-center gap-2"
             >
               Browse other products
               <ArrowRight size={18} />
             </Link>
-            
-            <button 
+
+            <button
               onClick={onClose}
-              className="text-sm text-white/55 hover:text-white transition-colors py-2"
+              className="text-sm text-white/55 hover:text-white transition-colors py-3"
             >
               Close
             </button>

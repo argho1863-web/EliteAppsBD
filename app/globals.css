@@ -147,12 +147,14 @@ a, button, [role='button'], summary, label {
   box-shadow: var(--depth-inset);
   color: var(--text);
   border-radius: 10px;
-  padding: 12px 16px;
   width: 100%;
   font-size: 14px;
   transition: border-color 150ms var(--ease);
   outline: none;
 }
+/* Default padding at zero specificity: this rule sits after Tailwind's utilities, so a plain
+   `padding` here would beat `pl-10` / `pl-12` and put the field icons on top of the text. */
+:where(.input-dark) { padding: 12px 16px; }
 .input-dark:focus { border-color: rgba(240, 165, 0, 0.6); }
 .input-dark::placeholder { color: var(--text-3); }
 
@@ -191,13 +193,6 @@ a, button, [role='button'], summary, label {
 .status-approved { background: rgba(76, 195, 138, 0.12); color: #4cc38a; border: 1px solid rgba(76, 195, 138, 0.24); }
 .status-cancelled{ background: rgba(229, 72, 77, 0.12); color: #e5484d; border: 1px solid rgba(229, 72, 77, 0.24); }
 
-.stagger-1 { animation-delay: 0.05s; }
-.stagger-2 { animation-delay: 0.1s; }
-.stagger-3 { animation-delay: 0.15s; }
-.stagger-4 { animation-delay: 0.2s; }
-/* index-driven stagger for grids: set style={{ '--i': n }} on the item (capped by the caller) */
-.stagger-i { animation-delay: calc(var(--i, 0) * 45ms); }
-
 /* one short fade and rise on load, one curve. Looping motion is removed. */
 @keyframes fadeUp { 0% { opacity: 0; transform: translateY(12px); } 100% { opacity: 1; transform: translateY(0); } }
 @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
@@ -214,6 +209,15 @@ a, button, [role='button'], summary, label {
 /* cart badge: a small bump each time the count changes (re-mounted via key) */
 @keyframes pop { 0% { transform: scale(0.6); } 55% { transform: scale(1.18); } 100% { transform: scale(1); } }
 .animate-pop { animation: pop 320ms var(--ease) both; }
+
+/* Stagger delays. These MUST come after every .animate-* rule above: each of those uses the
+   `animation` shorthand, which resets animation-delay to 0s when it comes later at equal specificity. */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+/* index-driven stagger for grids and stacked blocks: style={{ '--i': n }} (see components/motion.ts) */
+.stagger-i { animation-delay: calc(var(--i, 0) * 45ms); }
 
 /* ------------------------------------------------------------------
    Mobile drawer. Always mounted so it can animate out as well as in;
@@ -259,6 +263,37 @@ a, button, [role='button'], summary, label {
 
 /* reserved space for list sections while data loads, so nothing jumps */
 .skeleton { background: var(--card); border: 1px solid var(--line); border-radius: 16px; }
+
+/* a single short sideways nudge for a field that needs attention */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-5px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(2px); }
+}
+.animate-shake { animation: shake 360ms var(--ease) both; }
+
+/* a progress line that fills from the left */
+@keyframes growX { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.grow-x { transform-origin: left center; animation: growX 600ms var(--ease) 450ms backwards; }
+
+/* a list row that collapses out instead of vanishing. The row is the grid's only child. */
+.row-collapse {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 260ms var(--ease), opacity 200ms var(--ease);
+}
+.row-collapse > * { min-height: 0; }
+.row-collapse[data-leaving='true'] { grid-template-rows: 0fr; opacity: 0; }
+.row-collapse[data-leaving='true'] > * { overflow: hidden; }
+
+/* admin sidebar: slides on small screens; hidden from tab order while closed */
+.admin-sidebar { transition: transform 300ms var(--ease), visibility 0s linear 300ms; }
+.admin-sidebar[data-open='true'] { transition: transform 300ms var(--ease), visibility 0s; }
+@media (max-width: 1023px) {
+  .admin-sidebar:not([data-open='true']) { visibility: hidden; transform: translateX(-100%); }
+}
 
 /* ------------------------------------------------------------------
    3D system
@@ -310,8 +345,13 @@ a, button, [role='button'], summary, label {
   .tilt::after { display: none; }
   .lift-1, .lift-2, .lift-3 { transform: none; }
   .reveal[data-armed='true'] { opacity: 1; transform: none; }
-  .animate-fade-up, .animate-fade-in, .page-enter, .animate-pop { animation: none; }
-  .drawer-backdrop, .drawer-panel { transition: none; transform: none; }
+  .animate-fade-up, .animate-fade-in, .page-enter, .animate-pop, .animate-shake, .grow-x { animation: none; }
+  .row-collapse { transition: none; }
+  .admin-sidebar, .admin-sidebar[data-open='true'] { transition: none; }
+  /* loading spinners stay (they carry meaning) but slow down; pulses stop */
+  .animate-spin { animation-duration: 2.4s; }
+  .animate-pulse { animation: none; }
+  .drawer-backdrop, .drawer-backdrop[data-open='true'], .drawer-panel, .drawer-panel[data-open='true'] { transition: none; transform: none; }
   .drawer-panel[data-open='true'] .drawer-item { animation: none; }
   .hero-grid { transform: none !important; }
 }
@@ -333,7 +373,8 @@ a, button, [role='button'], summary, label {
 }
 
 @media (max-width: 768px) {
-  .input-dark { padding: 14px 18px; font-size: 16px; border-radius: 12px; }
+  .input-dark { font-size: 16px; border-radius: 12px; }
+  :where(.input-dark) { padding: 14px 18px; }
 }
 
 .preserve-3d { transform-style: preserve-3d; }

@@ -1,7 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { Star, CheckCircle, XCircle, Trash2, MessageSquare } from 'lucide-react';
+import { stagger } from '@/components/motion';
+import { Star, CheckCircle, XCircle, Trash2, MessageSquare, Clock } from 'lucide-react';
 
 interface Review {
   _id: string;
@@ -101,15 +102,15 @@ export default function AdminReviewsPage() {
             <div className="overflow-x-auto custom-scrollbar">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-white/2 border-b border-white/5">
+                  <tr className="bg-white/5 border-b border-white/5">
                     {['Date', 'Customer', 'Rating', 'Status', 'Actions'].map(h => (
                       <th key={h} className="px-6 py-5 text-xs text-white/55 font-medium">{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
-                  {reviews.map(review => (
-                    <tr key={review._id} className={`hover:bg-white/2 transition-colors group ${!review.isApproved ? 'bg-black/20' : ''}`}>
+                  {reviews.map((review, i) => (
+                    <tr key={review._id} style={stagger(i)} className={`hover:bg-white/5 transition-colors group animate-fade-up stagger-i ${!review.isApproved ? 'bg-black/20' : ''}`}>
                       <td className="px-6 py-4">
                         <p className="text-xs font-medium text-white/70">
                           {new Date(review.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
@@ -120,7 +121,7 @@ export default function AdminReviewsPage() {
                         <p className="text-xs text-white/55">{review.userEmail}</p>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex gap-0.5">
+                        <div className="flex gap-0.5" role="img" aria-label={`${review.rating} out of 5 stars`}>
                           {[1, 2, 3, 4, 5].map(s => (
                             <Star key={s} size={12} className={s <= review.rating ? 'text-amber-400 fill-amber-400' : 'text-white/55'} />
                           ))}
@@ -132,14 +133,15 @@ export default function AdminReviewsPage() {
                             ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
                             : 'bg-amber-400/10 text-amber-400 border-amber-400/20'
                         }`}>
-                          {review.isApproved ? <><CheckCircle size={12} /> Public</> : <><Star size={12} /> Pending</>}
+                          {review.isApproved ? <><CheckCircle size={12} /> Public</> : <><Clock size={12} /> Pending</>}
                         </span>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <button 
                             onClick={() => handleToggleApproval(review._id, review.isApproved)} 
-                            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${
+                            aria-label={review.isApproved ? 'Hide review' : 'Approve review'}
+                            className={`w-11 h-11 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center active:scale-90 transition-[color,background-color,transform] duration-150 ${
                               review.isApproved 
                                 ? 'bg-amber-400/10 text-amber-400 hover:bg-amber-400 hover:text-white border border-amber-400/20' 
                                 : 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white border border-emerald-500/20'
@@ -151,8 +153,9 @@ export default function AdminReviewsPage() {
                           
                           <button 
                             onClick={() => handleDelete(review._id)} 
-                            className="w-9 h-9 rounded-xl bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 flex items-center justify-center transition-colors"
-                            title="Delete Review"
+                            aria-label="Delete review"
+                            className="w-11 h-11 sm:w-9 sm:h-9 rounded-xl bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 flex items-center justify-center active:scale-90 transition-[color,background-color,transform] duration-150"
+                            title="Delete review"
                           >
                             <Trash2 size={14} />
                           </button>

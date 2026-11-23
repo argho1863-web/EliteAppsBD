@@ -5,7 +5,7 @@ import { MessageCircle, Mail } from 'lucide-react';
 const wallets = [
   { name: 'bKash', color: '#E2136E' },
   { name: 'Nagad', color: '#F7941D' },
-  { name: 'Rocket', color: '#8B5CF6' },
+  { name: 'Rocket', color: '#9CA3AF' },
   { name: 'Upay', color: '#10B981' },
 ];
 
@@ -22,11 +22,11 @@ export default function Footer() {
             <p className="text-sm text-white/70 leading-relaxed max-w-xs mb-5">Apps, subscriptions and top-ups for Bangladesh. Pay with a mobile wallet and get your order on WhatsApp or email.</p>
             <div className="flex flex-wrap gap-3">
               <a href="https://wa.me/8801707776676" target="_blank" rel="noopener noreferrer"
-                className="btn-key flex items-center gap-2 text-xs px-3 py-2 rounded-lg text-white/80">
+                className="btn-key flex items-center gap-2 text-xs px-4 py-2.5 min-h-[44px] rounded-lg text-white/80">
                 <MessageCircle size={13} /> WhatsApp support
               </a>
               <a href="mailto:help@eliteappsbd.qzz.io"
-                className="btn-key flex items-center gap-2 text-xs px-3 py-2 rounded-lg text-white/80">
+                className="btn-key flex items-center gap-2 text-xs px-4 py-2.5 min-h-[44px] rounded-lg text-white/80">
                 <Mail size={13} /> Email support
               </a>
             </div>
@@ -34,18 +34,18 @@ export default function Footer() {
 
           <div>
             <h4 className="text-sm font-medium text-white/90 mb-4">Store</h4>
-            <ul className="space-y-2.5">
+            <ul className="space-y-0 sm:space-y-2.5">
               {[{ label: 'All products', href: '/products' }, { label: 'Cart', href: '/cart' }].map(l => (
-                <li key={l.href}><Link href={l.href} className="text-sm text-white/70 hover:text-white transition-colors">{l.label}</Link></li>
+                <li key={l.href}><Link href={l.href} className="text-sm text-white/70 hover:text-white transition-colors inline-flex items-center min-h-[44px] sm:min-h-0">{l.label}</Link></li>
               ))}
             </ul>
           </div>
 
           <div>
             <h4 className="text-sm font-medium text-white/90 mb-4">Account</h4>
-            <ul className="space-y-2.5">
+            <ul className="space-y-0 sm:space-y-2.5">
               {[{ label: 'Sign in', href: '/auth/signin' }, { label: 'Sign up', href: '/auth/signup' }].map(l => (
-                <li key={l.href}><Link href={l.href} className="text-sm text-white/70 hover:text-white transition-colors">{l.label}</Link></li>
+                <li key={l.href}><Link href={l.href} className="text-sm text-white/70 hover:text-white transition-colors inline-flex items-center min-h-[44px] sm:min-h-0">{l.label}</Link></li>
               ))}
             </ul>
           </div>
